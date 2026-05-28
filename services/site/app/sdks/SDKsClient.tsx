@@ -3,9 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { motion } from "motion/react";
-import { sdks, typescriptPackages, advancedPackages, supportedChains, type SDK, type Package } from "./data";
+import { sdks, type SDK } from "./data";
 
-// Icons
 function TypeScriptIcon({ className = "" }: { className?: string }) {
   return (
     <svg viewBox="0 0 32 32" className={className} aria-hidden="true">
@@ -47,10 +46,6 @@ function GoIcon({ className = "" }: { className?: string }) {
   return (
     <svg viewBox="0 0 32 32" className={className} aria-hidden="true">
       <path
-        d="M3.9 10.31a.19.19 0 0 1-.16-.08.17.17 0 0 1 0-.18c.09-.14 1-1.41 3.06-1.41a4.62 4.62 0 0 1 1.81.37.17.17 0 0 1 .09.23.18.18 0 0 1-.23.09 4.27 4.27 0 0 0-1.67-.35c-1.83 0-2.7 1.17-2.78 1.28a.19.19 0 0 1-.12.05zm24.2 0a.19.19 0 0 0 .16-.08.17.17 0 0 0 0-.18c-.09-.14-1-1.41-3.06-1.41a4.62 4.62 0 0 0-1.81.37.17.17 0 0 0-.09.23.18.18 0 0 0 .23.09 4.27 4.27 0 0 1 1.67-.35c1.83 0 2.7 1.17 2.78 1.28a.19.19 0 0 0 .12.05z"
-        fill="#F6D2A2"
-      />
-      <path
         d="M16 24.28c-4.78 0-8.67-3.58-8.67-8s3.89-8 8.67-8 8.67 3.58 8.67 8-3.89 8-8.67 8z"
         fill="#00ACD7"
       />
@@ -69,6 +64,36 @@ function GoIcon({ className = "" }: { className?: string }) {
     </svg>
   );
 }
+
+function JavaIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 32 32" className={className} aria-hidden="true">
+      <path
+        d="M11.61 19.36s-1.04.6.74.81c2.16.25 3.26.21 5.65-.24a9.55 9.55 0 0 0 1.5.74c-5.34 2.3-12.08-.13-7.89-1.31zM10.96 16.43s-1.16.86.62 1.05c2.3.25 4.12.27 7.29-.34a3.17 3.17 0 0 0 1.12.69c-6.45 1.89-13.65.15-9.03-1.4z"
+        fill="#0074BD"
+      />
+      <path
+        d="M16.47 11.27c1.3 1.51-.34 2.86-.34 2.86s3.31-1.71 1.79-3.85c-1.42-2-2.51-3 3.39-6.43 0 0-9.25 2.31-4.84 7.42z"
+        fill="#EA2D2E"
+      />
+      <path
+        d="M23.49 21.55s.77.63-.85 1.12c-3.07.93-12.79 1.21-15.49.04-.97-.42.85-1 1.43-1.12.6-.13.94-.11.94-.11-1.08-.76-6.99 1.49-3 2.13 10.86 1.76 19.81-.79 16.97-2.06zM12.1 13.4s-4.95 1.18-1.76 1.6c1.35.18 4.04.14 6.54-.07 2.05-.17 4.1-.54 4.1-.54s-.72.31-1.24.66c-5.03 1.32-14.74.7-11.94-.65 2.37-1.14 4.3-1 4.3-1zM21.18 18.47c5.11-2.65 2.75-5.2 1.1-4.86-.4.08-.58.15-.58.15s.15-.24.45-.34c3.36-1.18 5.94 3.49-1.05 5.18 0 0 .06-.05.08-.13zM18.9 0s2.83 2.83-2.68 7.18c-4.42 3.49-1.01 5.48 0 7.75-2.58-2.33-4.48-4.38-3.2-6.29C14.89 5.85 20.04 4.5 18.9 0z"
+        fill="#0074BD"
+      />
+      <path
+        d="M12.6 25.61c4.91.31 12.44-.17 12.62-2.49 0 0-.34.88-4.05 1.58-4.18.79-9.34.7-12.41.19 0 0 .62.51 3.84.72z"
+        fill="#EA2D2E"
+      />
+    </svg>
+  );
+}
+
+const iconMap: Record<string, React.FC<{ className?: string }>> = {
+  typescript: TypeScriptIcon,
+  python: PythonIcon,
+  go: GoIcon,
+  java: JavaIcon,
+};
 
 function CopyIcon({ className = "" }: { className?: string }) {
   return (
@@ -139,45 +164,6 @@ function GitHubIcon({ className = "" }: { className?: string }) {
   );
 }
 
-function PackageIcon({ className = "", style }: { className?: string; style?: React.CSSProperties }) {
-  return (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-      style={style}
-      aria-hidden="true"
-    >
-      <path d="M16.5 9.4 7.5 4.21" />
-      <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-      <polyline points="3.29 7 12 12 20.71 7" />
-      <line x1="12" y1="22" x2="12" y2="12" />
-    </svg>
-  );
-}
-
-const iconMap: Record<string, React.FC<{ className?: string }>> = {
-  typescript: TypeScriptIcon,
-  python: PythonIcon,
-  go: GoIcon,
-};
-
-const packageGroups = [
-  { label: "Core", packages: typescriptPackages.filter((p) => ["@t402/core", "@t402/extensions"].includes(p.name)) },
-  { label: "Mechanisms", packages: typescriptPackages.filter((p) => ["@t402/evm-core", "@t402/evm", "@t402/svm", "@t402/ton", "@t402/tron", "@t402/near", "@t402/aptos", "@t402/tezos", "@t402/polkadot", "@t402/stacks", "@t402/cosmos", "@t402/btc"].includes(p.name)) },
-  { label: "HTTP & Client", packages: typescriptPackages.filter((p) => ["@t402/express", "@t402/hono", "@t402/fastify", "@t402/next", "@t402/fetch", "@t402/axios"].includes(p.name)) },
-  { label: "UI", packages: typescriptPackages.filter((p) => ["@t402/paywall", "@t402/react", "@t402/vue", "@t402/react-native"].includes(p.name)) },
-  { label: "Agents", packages: typescriptPackages.filter((p) => ["@t402/mcp", "@t402/a2a"].includes(p.name)) },
-  { label: "WDK & Tools", packages: typescriptPackages.filter((p) => ["@t402/wdk", "@t402/wdk-gasless", "@t402/wdk-bridge", "@t402/wdk-multisig", "@t402/wdk-protocol", "@t402/wdk-defi", "@t402/wdk-ton", "@t402/wdk-ton-gasless", "@t402/wdk-tron-gasfree", "@t402/cli"].includes(p.name)) },
-  { label: "Advanced (Beta)", packages: advancedPackages },
-];
-
 function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
 
@@ -190,143 +176,98 @@ function CopyButton({ text }: { text: string }) {
   return (
     <button
       onClick={handleCopy}
-      className="flex h-8 w-8 items-center justify-center rounded-md transition-colors"
-      style={{ background: "rgba(255,255,255,0.1)", color: "#A1A1AA" }}
-      aria-label={copied ? "Copied" : "Copy to clipboard"}
+      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md transition-colors"
+      style={{ background: "rgba(255,255,255,0.06)", color: "#A1A1AA" }}
+      aria-label={copied ? "Copied" : "Copy install command"}
     >
       {copied ? <CheckIcon style={{ color: "#50AF95" }} /> : <CopyIcon />}
     </button>
   );
 }
 
-function SDKCard({ sdk, isSelected, onSelect }: { sdk: SDK; isSelected: boolean; onSelect: () => void }) {
+function SDKCard({ sdk, index }: { sdk: SDK; index: number }) {
   const Icon = iconMap[sdk.icon];
 
   return (
-    <motion.button
-      onClick={onSelect}
-      className="group relative flex w-full flex-col items-start gap-3 rounded-2xl p-4 text-left transition-all duration-300 sm:gap-4 sm:p-6"
-      style={{
-        background: isSelected ? "rgba(80, 175, 149, 0.08)" : "#111113",
-        border: isSelected ? "1px solid rgba(80, 175, 149, 0.3)" : "1px solid rgba(255,255,255,0.08)",
-      }}
-      whileHover={{ y: -2 }}
-      whileTap={{ scale: 0.98 }}
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.5, delay: index * 0.08 }}
+      className="rounded-2xl p-6 sm:p-8"
+      style={{ background: "#111113", border: "1px solid rgba(255,255,255,0.08)" }}
     >
-      <div className="flex w-full items-start justify-between gap-2">
-        <div className="flex items-center gap-2 sm:gap-3">
-          {Icon && <Icon className="h-8 w-8 shrink-0 sm:h-10 sm:w-10" />}
-          <div className="min-w-0">
-            <h3 className="text-base font-semibold sm:text-lg" style={{ color: "#FAFAFA" }}>{sdk.name}</h3>
-            <p className="text-xs sm:text-sm" style={{ color: "#71717A" }}>{sdk.language}</p>
+      <div className="mb-4 flex items-start justify-between gap-3">
+        <div className="flex items-center gap-3">
+          {Icon && <Icon className="h-10 w-10 shrink-0" />}
+          <div>
+            <h3 className="text-lg font-semibold" style={{ color: "#FAFAFA" }}>
+              {sdk.name}
+            </h3>
+            <p className="text-sm" style={{ color: "#71717A" }}>
+              {sdk.language}
+            </p>
           </div>
         </div>
         <span
-          className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium sm:px-2.5 sm:py-1 sm:text-xs"
+          className="shrink-0 rounded-full px-2.5 py-1 text-xs font-medium"
           style={{ background: "rgba(255,255,255,0.06)", color: "#A1A1AA" }}
         >
           v{sdk.version}
         </span>
       </div>
-      <p className="text-sm leading-relaxed" style={{ color: "#A1A1AA" }}>{sdk.description}</p>
-      <div className="flex flex-wrap gap-1.5 sm:gap-2">
-        {sdk.features.slice(0, 3).map((feature) => (
-          <span
-            key={feature}
-            className="rounded-md px-1.5 py-0.5 text-[10px] sm:px-2 sm:py-1 sm:text-xs"
-            style={{ background: "rgba(255,255,255,0.06)", color: "#71717A" }}
-          >
-            {feature}
-          </span>
-        ))}
-        {sdk.features.length > 3 && (
-          <span
-            className="rounded-md px-1.5 py-0.5 text-[10px] sm:px-2 sm:py-1 sm:text-xs"
-            style={{ background: "rgba(255,255,255,0.06)", color: "#71717A" }}
-          >
-            +{sdk.features.length - 3} more
-          </span>
-        )}
-      </div>
-    </motion.button>
-  );
-}
 
-function CodeBlock({ code, language }: { code: string; language: string }) {
-  return (
-    <div className="relative">
-      <div className="absolute right-2 top-2 sm:right-3 sm:top-3">
-        <CopyButton text={code} />
-      </div>
-      <pre
-        className="overflow-x-auto rounded-xl p-3 pr-12 sm:p-4 sm:pr-14"
-        style={{ background: "#111113", border: "1px solid rgba(255,255,255,0.08)" }}
+      <p className="mb-6 text-sm leading-relaxed" style={{ color: "#A1A1AA" }}>
+        {sdk.description}
+      </p>
+
+      <div
+        className="mb-6 flex items-center gap-2 rounded-xl p-3"
+        style={{ background: "#0A0A0B", border: "1px solid rgba(255,255,255,0.06)" }}
       >
-        <code className="text-xs leading-relaxed sm:text-sm" style={{ color: "#A1A1AA" }}>{code}</code>
-      </pre>
-    </div>
-  );
-}
-
-function InstallCommand({ command, packageManager }: { command: string; packageManager?: string }) {
-  return (
-    <div
-      className="flex items-center gap-2 rounded-xl p-2.5 sm:p-3"
-      style={{ background: "#111113", border: "1px solid rgba(255,255,255,0.08)" }}
-    >
-      <span className="hidden sm:inline" style={{ color: "#50AF95" }}>$</span>
-      <code className="flex-1 overflow-x-auto whitespace-nowrap text-xs sm:text-sm" style={{ color: "#FAFAFA" }}>{command}</code>
-      <CopyButton text={command} />
-    </div>
-  );
-}
-
-const badgeStyles: Record<string, { bg: string; color: string; border: string }> = {
-  new: { bg: "rgba(16, 185, 129, 0.1)", color: "#34D399", border: "rgba(16, 185, 129, 0.2)" },
-  beta: { bg: "rgba(245, 158, 11, 0.1)", color: "#FBBF24", border: "rgba(245, 158, 11, 0.2)" },
-  deprecated: { bg: "rgba(239, 68, 68, 0.1)", color: "#F87171", border: "rgba(239, 68, 68, 0.2)" },
-};
-
-function PackageCard({ pkg }: { pkg: Package }) {
-  return (
-    <div
-      className="rounded-xl p-3 sm:p-4"
-      style={{ background: "#111113", border: "1px solid rgba(255,255,255,0.08)" }}
-    >
-      <div className="mb-2 flex flex-wrap items-center gap-1.5 sm:gap-2">
-        <PackageIcon className="h-4 w-4 shrink-0" style={{ color: "#50AF95" }} />
-        <code className="break-all text-xs font-medium sm:text-sm" style={{ color: "#FAFAFA" }}>{pkg.name}</code>
-        {pkg.badge && (
-          <span
-            className="shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wider sm:px-2 sm:text-[10px]"
-            style={{
-              background: badgeStyles[pkg.badge].bg,
-              color: badgeStyles[pkg.badge].color,
-              border: `1px solid ${badgeStyles[pkg.badge].border}`,
-            }}
-          >
-            {pkg.badge}
-          </span>
-        )}
+        <span style={{ color: "#50AF95" }}>$</span>
+        <code className="flex-1 overflow-x-auto whitespace-nowrap text-sm" style={{ color: "#FAFAFA" }}>
+          {sdk.installCommand}
+        </code>
+        <CopyButton text={sdk.installCommand} />
       </div>
-      <p className="text-xs sm:text-sm" style={{ color: "#71717A" }}>{pkg.description}</p>
-    </div>
+
+      <div className="flex flex-wrap gap-3">
+        <Link
+          href={sdk.docsUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-all hover:opacity-90"
+          style={{ background: "#50AF95", color: "#0A0A0B" }}
+        >
+          Docs
+          <ExternalLinkIcon />
+        </Link>
+        <Link
+          href={sdk.githubUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-all"
+          style={{ border: "1px solid rgba(255,255,255,0.16)", color: "#FAFAFA" }}
+        >
+          <GitHubIcon className="h-4 w-4" />
+          GitHub
+        </Link>
+      </div>
+    </motion.div>
   );
 }
 
 export default function SDKsClient() {
-  const [selectedSDK, setSelectedSDK] = useState<SDK>(sdks[0]);
-
   return (
     <>
-      {/* Hero Section - Dark */}
+      {/* Hero */}
       <section className="section-dark py-24 md:py-32">
-        <div className="mx-auto max-w-7xl px-6">
+        <div className="mx-auto max-w-7xl px-6 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="text-center"
           >
             <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: "#50AF95" }}>
               SDKs
@@ -335,277 +276,39 @@ export default function SDKsClient() {
               Build with T402
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg" style={{ color: "#A1A1AA" }}>
-              Production-ready SDKs for integrating t402 payments into your applications.
-              Choose your language and start accepting payments in minutes.
+              Official SDKs for TypeScript, Python, Go, and Java. Pick a language, copy the
+              install command, and follow the docs.
             </p>
           </motion.div>
         </div>
       </section>
 
-      {/* SDK Selection - Light Section */}
-      <section className="section-light py-24 md:py-32">
+      {/* SDK grid */}
+      <section className="section-dark pb-24 md:pb-32">
         <div className="mx-auto max-w-7xl px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-            className="mb-12"
-          >
-            <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: "#50AF95" }}>
-              Choose Your Language
-            </span>
-            <h2 className="mt-4 text-3xl font-bold tracking-tight md:text-4xl" style={{ color: "#1A1A2E" }}>
-              Official Libraries
-            </h2>
-          </motion.div>
-
           <div className="grid gap-6 sm:grid-cols-2">
             {sdks.map((sdk, index) => (
-              <motion.div
-                key={sdk.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-              >
-                <button
-                  onClick={() => setSelectedSDK(sdk)}
-                  className="card-elevated group relative flex w-full flex-col items-start gap-4 p-8 text-left"
-                  style={{
-                    borderColor: selectedSDK.id === sdk.id ? "#50AF95" : undefined,
-                    boxShadow: selectedSDK.id === sdk.id ? "0 0 0 1px #50AF95" : undefined,
-                  }}
-                >
-                  <div className="flex w-full items-start justify-between gap-2">
-                    <div className="flex items-center gap-3">
-                      {(() => { const Ic = iconMap[sdk.icon]; return Ic ? <Ic className="h-10 w-10 shrink-0" /> : null; })()}
-                      <div className="min-w-0">
-                        <h3 className="text-lg font-semibold" style={{ color: "#1A1A2E" }}>{sdk.name}</h3>
-                        <p className="text-sm" style={{ color: "#718096" }}>{sdk.language}</p>
-                      </div>
-                    </div>
-                    <span
-                      className="shrink-0 rounded-full px-2.5 py-1 text-xs font-medium"
-                      style={{ background: "#F7FAF9", color: "#4A5568" }}
-                    >
-                      v{sdk.version}
-                    </span>
-                  </div>
-                  <p className="text-sm leading-relaxed" style={{ color: "#4A5568" }}>{sdk.description}</p>
-                  <div className="flex flex-wrap gap-2">
-                    {sdk.features.slice(0, 3).map((feature) => (
-                      <span
-                        key={feature}
-                        className="rounded-md px-2 py-1 text-xs"
-                        style={{ background: "#F7FAF9", color: "#718096" }}
-                      >
-                        {feature}
-                      </span>
-                    ))}
-                    {sdk.features.length > 3 && (
-                      <span
-                        className="rounded-md px-2 py-1 text-xs"
-                        style={{ background: "#F7FAF9", color: "#718096" }}
-                      >
-                        +{sdk.features.length - 3} more
-                      </span>
-                    )}
-                  </div>
-                </button>
-              </motion.div>
+              <SDKCard key={sdk.id} sdk={sdk} index={index} />
             ))}
           </div>
-        </div>
-      </section>
 
-      {/* Selected SDK Details - Dark Section */}
-      <section className="section-dark py-24 md:py-32">
-        <div className="mx-auto max-w-7xl px-6">
-          <motion.div
-            key={selectedSDK.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-            className="grid gap-12 lg:grid-cols-2"
-          >
-            {/* Installation & Links */}
-            <div className="space-y-6">
-              <div>
-                <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: "#50AF95" }}>
-                  Get Started
-                </span>
-                <h2 className="mt-4 text-3xl font-bold tracking-tight" style={{ color: "#FAFAFA" }}>
-                  {selectedSDK.name} SDK
-                </h2>
-              </div>
-
-              <div>
-                <h3 className="mb-3 text-lg font-semibold" style={{ color: "#FAFAFA" }}>Installation</h3>
-                <InstallCommand command={selectedSDK.installCommand} packageManager={selectedSDK.packageManager} />
-              </div>
-
-              <div>
-                <h3 className="mb-3 text-lg font-semibold" style={{ color: "#FAFAFA" }}>Quick Start</h3>
-                <CodeBlock code={selectedSDK.codeExample} language={selectedSDK.language} />
-              </div>
-
-              <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-                <Link
-                  href={selectedSDK.docsUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold transition-all hover:shadow-glow"
-                  style={{ background: "#50AF95", color: "#0A0A0B" }}
-                >
-                  View Documentation
-                  <ExternalLinkIcon />
-                </Link>
-                <Link
-                  href={selectedSDK.githubUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold transition-all"
-                  style={{ border: "1px solid rgba(255,255,255,0.2)", color: "#FAFAFA" }}
-                >
-                  <GitHubIcon className="h-4 w-4" />
-                  View on GitHub
-                </Link>
-              </div>
-            </div>
-
-            {/* Features */}
-            <div className="space-y-6">
-              <div>
-                <h3 className="mb-4 text-lg font-semibold" style={{ color: "#FAFAFA" }}>Features</h3>
-                <ul className="grid gap-3 sm:grid-cols-2">
-                  {selectedSDK.features.map((feature) => (
-                    <li key={feature} className="flex items-center gap-2 text-sm" style={{ color: "#A1A1AA" }}>
-                      <span
-                        className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full"
-                        style={{ background: "rgba(80, 175, 149, 0.15)" }}
-                      >
-                        <CheckIcon className="h-3 w-3" style={{ color: "#50AF95" }} />
-                      </span>
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* TypeScript Packages — compact grouped list */}
-              {selectedSDK.id === "typescript" && (
-                <div className="space-y-6">
-                  <h3 className="text-lg font-semibold" style={{ color: "#FAFAFA" }}>
-                    Packages <span className="text-sm font-normal" style={{ color: "#71717A" }}>({typescriptPackages.length + advancedPackages.length})</span>
-                  </h3>
-                  {packageGroups.map((group) => (
-                    <div key={group.label}>
-                      <p className="mb-2 text-xs font-semibold uppercase tracking-widest" style={{ color: "#50AF95" }}>
-                        {group.label}
-                      </p>
-                      <div className="grid grid-cols-2 gap-1.5">
-                        {group.packages.map((pkg) => (
-                          <div
-                            key={pkg.name}
-                            className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5"
-                            style={{ background: "rgba(255,255,255,0.04)" }}
-                          >
-                            <code className="truncate text-xs" style={{ color: "#FAFAFA" }}>{pkg.name}</code>
-                            {pkg.badge && (
-                              <span
-                                className="shrink-0 rounded px-1 py-0.5 text-[8px] font-semibold uppercase"
-                                style={{
-                                  background: badgeStyles[pkg.badge].bg,
-                                  color: badgeStyles[pkg.badge].color,
-                                }}
-                              >
-                                {pkg.badge}
-                              </span>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Supported Chains - Light Alt Section */}
-      <section className="section-light-alt py-24 md:py-32">
-        <div className="mx-auto max-w-7xl px-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
-            className="text-center"
+            className="mt-16 text-center"
           >
-            <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: "#50AF95" }}>
-              Multi-Chain
-            </span>
-            <h2 className="mt-4 mb-8 text-3xl font-bold tracking-tight md:text-4xl" style={{ color: "#1A1A2E" }}>
-              Supported Chains
-            </h2>
-          </motion.div>
-
-          <div className="flex flex-wrap justify-center gap-3">
-            {supportedChains.map((chain) => (
-              <div
-                key={chain.id}
-                className="flex items-center gap-2 rounded-full px-4 py-2"
-                style={{ background: "white", border: "1px solid rgba(0,0,0,0.08)" }}
-              >
-                <span
-                  className="h-3 w-3 rounded-full"
-                  style={{ backgroundColor: chain.color }}
-                  aria-hidden="true"
-                />
-                <span className="text-sm font-medium" style={{ color: "#1A1A2E" }}>{chain.name}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA - Dark Section */}
-      <section className="section-dark relative overflow-hidden py-24 md:py-32">
-        <div
-          className="pointer-events-none absolute inset-0"
-          style={{
-            background: "radial-gradient(ellipse 80% 60% at 50% 50%, rgba(80, 175, 149, 0.08), transparent)",
-          }}
-        />
-        <div className="relative mx-auto max-w-7xl px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-            className="mx-auto max-w-3xl text-center"
-          >
-            <h2 className="text-3xl font-bold tracking-tight md:text-4xl" style={{ color: "#FAFAFA" }}>
-              Ready to get started?
-            </h2>
-            <p className="mx-auto mt-6 max-w-xl text-lg" style={{ color: "#A1A1AA" }}>
-              Follow our quickstart guide to integrate t402 payments in under 5 minutes.
-            </p>
-            <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <Link
-                href="https://docs.t402.io/getting-started/quickstart"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-xl px-8 py-4 text-lg font-semibold transition-all hover:shadow-glow"
-                style={{ background: "#50AF95", color: "#0A0A0B" }}
-              >
-                Read the Quickstart Guide
-                <ExternalLinkIcon />
-              </Link>
-            </div>
+            <Link
+              href="https://docs.t402.io/getting-started/quickstart"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-xl px-8 py-4 text-base font-semibold transition-all hover:shadow-glow"
+              style={{ background: "#50AF95", color: "#0A0A0B" }}
+            >
+              Read the Quickstart
+              <ExternalLinkIcon />
+            </Link>
           </motion.div>
         </div>
       </section>
