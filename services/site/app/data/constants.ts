@@ -11,5 +11,4 @@ export const CHAIN_FAMILIES = [
   { name: "Cosmos", color: "#6F7390", count: 1 },
   { name: "Stellar", color: "#7C8CF8", count: 1 },
   { name: "Bitcoin", color: "#F7931A", count: 2 },
-  { name: "Spark", color: "#FF6B35", count: 1 },
 ] as const;

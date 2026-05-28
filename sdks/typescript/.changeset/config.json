@@ -6,7 +6,7 @@
   ],
   "commit": false,
   "fixed": [
-    ["@t402/core", "@t402/evm", "@t402/evm-core", "@t402/svm", "@t402/ton", "@t402/tron", "@t402/near", "@t402/aptos", "@t402/tezos", "@t402/polkadot", "@t402/stacks", "@t402/btc", "@t402/cosmos", "@t402/spark", "@t402/stellar"]
+    ["@t402/core", "@t402/evm", "@t402/evm-core", "@t402/svm", "@t402/ton", "@t402/tron", "@t402/near", "@t402/aptos", "@t402/tezos", "@t402/polkadot", "@t402/stacks", "@t402/btc", "@t402/cosmos", "@t402/stellar"]
   ],
   "linked": [
     ["@t402/wdk", "@t402/wdk-gasless", "@t402/wdk-bridge", "@t402/wdk-multisig"]
