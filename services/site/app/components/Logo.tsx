@@ -4,33 +4,36 @@ export interface T402LogoProps extends React.SVGProps<SVGSVGElement> {
   title?: string;
 }
 
-export function T402Logo({ title, ...props }: T402LogoProps) {
+/**
+ * T402 wordmark — pure typography. Renders "T402" via SVG <text>
+ * using the Source Serif 4 stack with sensible fallbacks. Uses
+ * `currentColor` so it inherits ink in NavBar (light bg) and cream
+ * in Footer (dark bg).
+ *
+ * Replaces the previous gem-with-₮ device mark for trademark
+ * distance from Tether (no Tether-inspired styling per the
+ * 2026-05-17 pivot lock).
+ */
+export function T402Logo({ title, className, ...props }: T402LogoProps) {
   return (
     <svg
-      viewBox="0 0 400 120"
-      fill="none"
+      viewBox="0 0 95 32"
       xmlns="http://www.w3.org/2000/svg"
       aria-hidden={title ? undefined : true}
       role={title ? "img" : "presentation"}
+      className={className}
       {...props}
     >
       {title ? <title>{title}</title> : null}
-      {/* Gem icon — brand teal with white ₮ symbol */}
-      <g transform="translate(10, 5) scale(0.21)">
-        <path d="M135 60H377L465 210L256 460L47 210L135 60Z" fill="#009393" />
-        <rect x="176" y="145" width="160" height="35" fill="white" />
-        <rect x="236" y="180" width="40" height="130" fill="white" />
-        <ellipse cx="256" cy="215" rx="105" ry="30" stroke="white" strokeWidth="12" fill="none" />
-      </g>
-      {/* T402 text */}
       <text
-        x="140"
-        y="75"
-        fontFamily="Inter, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif"
-        fontSize="52"
-        fontWeight="700"
+        x="0"
+        y="24"
+        fontFamily="var(--font-source-serif), 'Source Serif 4', Georgia, 'Iowan Old Style', serif"
+        fontSize="26"
+        fontWeight="500"
+        letterSpacing="-0.5"
         fill="currentColor"
-        letterSpacing="-1"
+        textRendering="geometricPrecision"
       >
         T402
       </text>
