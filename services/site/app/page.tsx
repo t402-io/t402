@@ -5,7 +5,6 @@ import { HTTPNativeSection } from "./components/HTTPNativeSection";
 import { HowItWorks } from "./components/HowItWorks";
 import { CodeExamples } from "./components/CodeExamples";
 import { FeatureBento } from "./components/FeatureBento";
-import { SDKShowcase } from "./components/SDKShowcase";
 import { CTA } from "./components/CTA";
 import { Footer } from "./components/Footer";
 
@@ -19,7 +18,6 @@ export default function HomePage() {
       <HowItWorks />
       <CodeExamples />
       <FeatureBento />
-      <SDKShowcase />
       <CTA />
       <Footer />
     </div>
