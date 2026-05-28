@@ -6,7 +6,7 @@ import { BackgroundVideo } from "./BackgroundVideo";
 
 const stats = [
   { value: "47", label: "Networks" },
-  { value: "69", label: "Kinds" },
+  { value: "71", label: "Kinds" },
   { value: "4", label: "SDKs" },
   { value: "$0", label: "Fees" },
 ];

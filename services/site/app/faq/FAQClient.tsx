@@ -168,7 +168,7 @@ const faqs: FAQItem[] = [
     id: "sdk-languages",
     question: "Which programming languages are supported?",
     answer:
-      "T402 offers official SDKs for TypeScript/JavaScript, Python, Go, and Java. TypeScript has the most complete ecosystem with 42 packages including React/Vue components. All SDKs support the same 47 networks with identical payment flows.",
+      "T402 offers official SDKs for TypeScript/JavaScript, Python, Go, and Java. TypeScript has the most complete ecosystem with 47 packages including React/Vue components. All SDKs support the same 47 networks with identical payment flows.",
     category: "integration",
   },
   {
