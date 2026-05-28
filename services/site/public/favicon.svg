@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <style>
+    .bg { fill: #FAFAF7; }
+    .fg { fill: #0F0F0F; }
+    @media (prefers-color-scheme: dark) {
+      .bg { fill: #0F0F0F; }
+      .fg { fill: #FAFAF7; }
+    }
+  </style>
+  <rect class="bg" width="32" height="32"/>
+  <text class="fg"
+        x="16" y="23"
+        text-anchor="middle"
+        font-family="Georgia, 'Iowan Old Style', 'Source Serif 4', 'Times New Roman', serif"
+        font-weight="500"
+        font-size="18"
+        font-style="normal"
+        letter-spacing="-0.5">402</text>
+</svg>
