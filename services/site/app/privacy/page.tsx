@@ -20,20 +20,26 @@ export default function PrivacyPage() {
       <NavBar />
 
       <div className="flex-1">
-        <article className="pb-20">
-          <header className="max-w-4xl mx-auto px-4 sm:px-6 md:px-10 lg:px-16 pt-12 sm:pt-16 md:pt-20">
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight mb-4">
+        <article className="pb-24">
+          <header className="max-w-editorial mx-auto px-6 pt-16 sm:pt-20 md:pt-28">
+            <div className="mb-10 flex items-baseline justify-between text-foreground-secondary">
+              <span className="editorial-mark text-base md:text-lg">N° 402.PRIV</span>
+              <span className="eyebrow">Privacy Policy</span>
+            </div>
+            <hr className="rule" />
+            <h1 className="mt-12 mb-6 font-serif text-4xl leading-[1.1] md:text-6xl">
               Privacy Policy
             </h1>
-            <p className="text-base text-foreground-tertiary mb-8">
-              Last updated: May 28, 2026
+            <p className="eyebrow text-foreground-tertiary mb-10">
+              Last updated · May 28, 2026
             </p>
+            <hr className="rule" />
           </header>
 
-          <section className="max-w-4xl mx-auto px-4 sm:px-6 md:px-10 lg:px-16 space-y-8">
+          <section className="max-w-editorial mx-auto px-6 mt-12 space-y-8">
             {/* Introduction */}
-            <div className="rounded-xl border border-border bg-background-secondary p-6">
-              <p className="text-base leading-relaxed text-foreground-secondary">
+            <div className="border-l-2 pl-6 py-2" style={{ borderColor: "var(--color-brand)" }}>
+              <p className="font-serif text-base italic leading-relaxed text-foreground-secondary md:text-lg">
                 T402 is an open-source protocol. This privacy policy covers the services operated by the T402 team: the website (t402.io), documentation (docs.t402.io), demo (demo.t402.io), the facilitator service (facilitator.t402.io), and the commercial sibling service t402 Pay (pay.t402.io).
               </p>
             </div>

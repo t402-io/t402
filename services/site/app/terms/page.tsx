@@ -20,20 +20,26 @@ export default function TermsPage() {
       <NavBar />
 
       <div className="flex-1">
-        <article className="pb-20">
-          <header className="max-w-4xl mx-auto px-4 sm:px-6 md:px-10 lg:px-16 pt-12 sm:pt-16 md:pt-20">
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight mb-4">
+        <article className="pb-24">
+          <header className="max-w-editorial mx-auto px-6 pt-16 sm:pt-20 md:pt-28">
+            <div className="mb-10 flex items-baseline justify-between text-foreground-secondary">
+              <span className="editorial-mark text-base md:text-lg">N° 402.TOS</span>
+              <span className="eyebrow">Terms of Service</span>
+            </div>
+            <hr className="rule" />
+            <h1 className="mt-12 mb-6 font-serif text-4xl leading-[1.1] md:text-6xl">
               Terms of Service
             </h1>
-            <p className="text-base text-foreground-tertiary mb-8">
-              Last updated: May 28, 2026
+            <p className="eyebrow text-foreground-tertiary mb-10">
+              Last updated · May 28, 2026
             </p>
+            <hr className="rule" />
           </header>
 
-          <section className="max-w-4xl mx-auto px-4 sm:px-6 md:px-10 lg:px-16 space-y-8">
+          <section className="max-w-editorial mx-auto px-6 mt-12 space-y-8">
             {/* Introduction */}
-            <div className="rounded-xl border border-border bg-background-secondary p-6">
-              <p className="text-base leading-relaxed text-foreground-secondary">
+            <div className="border-l-2 pl-6 py-2" style={{ borderColor: "var(--color-brand)" }}>
+              <p className="font-serif text-base italic leading-relaxed text-foreground-secondary md:text-lg">
                 These Terms of Service (&quot;Terms&quot;) govern your use of the T402 protocol, related services, SDKs, and tools. By using any T402 service, you agree to these Terms.
               </p>
             </div>
@@ -146,7 +152,7 @@ export default function TermsPage() {
             {/* Disclaimers */}
             <section className="space-y-4">
               <h2 className="text-2xl font-semibold mt-8">7. Disclaimers</h2>
-              <div className="rounded-xl border border-border bg-background-secondary p-6 space-y-3">
+              <div className="border-l-2 pl-6 py-2 space-y-3" style={{ borderColor: "var(--color-rule-soft)" }}>
                 <p className="text-base leading-relaxed text-foreground-secondary">
                   THE SERVICES AND SDKS ARE PROVIDED &quot;AS IS&quot; AND &quot;AS AVAILABLE&quot; WITHOUT WARRANTIES OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.
                 </p>
