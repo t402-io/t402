@@ -38,8 +38,9 @@ export function CTA() {
             Start Building with T402
           </h2>
           <p className="mx-auto mt-6 max-w-xl text-lg text-foreground-secondary">
-            Open-source payment protocol. Add USDT payments to any HTTP service
-            in minutes.
+            Open-source HTTP payment protocol. Wire-compatible with x402, plus
+            authCapture, dispute, and USDT-on-TRON. Self-host the facilitator or
+            use t402 Pay.
           </p>
 
           {/* Buttons */}
@@ -70,13 +71,13 @@ export function CTA() {
               <svg className="h-4 w-4 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
               </svg>
-              <span>Open Source</span>
+              <span>x402-compatible</span>
             </div>
             <div className="flex items-center gap-2">
               <svg className="h-4 w-4 text-info" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
               </svg>
-              <span>Cloud Agnostic</span>
+              <span>WDK-compatible</span>
             </div>
           </div>
         </motion.div>
