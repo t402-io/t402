@@ -33,10 +33,10 @@ function TelegramIcon({ className }: { className?: string }) {
 
 const footerLinks = {
   protocol: [
-    { label: "Specification", href: "/features" },
-    { label: "Whitepaper", href: "/t402-whitepaper.pdf", external: true },
     { label: "Features", href: "/features" },
-    { label: "Transports", href: "/transports" },
+    { label: "Chains", href: "/chains" },
+    { label: "Why T402", href: "/compare" },
+    { label: "Whitepaper", href: "/t402-whitepaper.pdf", external: true },
   ],
   developers: [
     { label: "Documentation", href: "https://docs.t402.io", external: true },
@@ -47,17 +47,8 @@ const footerLinks = {
   ],
   resources: [
     { label: "GitHub", href: "https://github.com/t402-io/t402", external: true },
-    { label: "FAQ", href: "/faq" },
     { label: "Status", href: "https://status.t402.io", external: true },
     { label: "t402 Pay", href: "https://pay.t402.io", external: true },
-  ],
-  chains: [
-    { label: "Ethereum", href: "/chains/ethereum" },
-    { label: "Solana", href: "/chains/solana" },
-    { label: "TON", href: "/chains/ton" },
-    { label: "TRON", href: "/chains/tron" },
-    { label: "NEAR", href: "/chains/near" },
-    { label: "View All Chains", href: "/chains" },
   ],
 };
 
@@ -132,11 +123,10 @@ export function Footer() {
             </div>
 
             {/* Link columns */}
-            <div className="grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-4 sm:gap-8 lg:col-span-4">
+            <div className="grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-3 sm:gap-8 lg:col-span-4">
               <FooterColumn title="Protocol" links={footerLinks.protocol} />
               <FooterColumn title="Developers" links={footerLinks.developers} />
               <FooterColumn title="Resources" links={footerLinks.resources} />
-              <FooterColumn title="Chains" links={footerLinks.chains} />
             </div>
           </div>
         </div>
