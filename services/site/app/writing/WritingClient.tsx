@@ -36,16 +36,6 @@ const articles: Article[] = [
     category: "announcement",
   },
   {
-    slug: "multichain-architecture",
-    title: "How T402 Achieves Multi-Chain Payment Settlement",
-    description:
-      "A deep dive into the architecture behind T402's support for 47 networks across 13 families. Learn how CAIP-2 identifiers, scheme-network separation, and the facilitator pattern enable true multi-chain payments.",
-    date: "Jan 18, 2026",
-    readTime: "12 min",
-    tags: ["Architecture", "Multi-Chain"],
-    category: "technical",
-  },
-  {
     slug: "gasless-payments",
     title: "Gasless Payments with ERC-4337 Account Abstraction",
     description:
@@ -54,26 +44,6 @@ const articles: Article[] = [
     readTime: "10 min",
     tags: ["ERC-4337", "Gasless"],
     category: "technical",
-  },
-  {
-    slug: "ai-agents-mcp",
-    title: "AI Agent Payments with MCP Integration",
-    description:
-      "How autonomous AI agents use the Model Context Protocol to discover, authorize, and execute payments without human intervention. Build AI-powered services that monetize via T402.",
-    date: "Jan 22, 2026",
-    readTime: "9 min",
-    tags: ["AI", "MCP"],
-    category: "ecosystem",
-  },
-  {
-    slug: "getting-started-express",
-    title: "Add Payments to Your Express.js API in 5 Minutes",
-    description:
-      "A step-by-step guide to integrating T402 payments into an existing Express.js application. From installation to accepting your first stablecoin payment.",
-    date: "Jan 23, 2026",
-    readTime: "5 min",
-    tags: ["Tutorial", "Express.js"],
-    category: "guide",
   },
   {
     slug: "sdk-comparison",
