@@ -5,93 +5,13 @@ import Link from "next/link";
 export const metadata = {
   title: "Pricing | t402",
   description:
-    "Simple, transparent pricing. Free for developers. Pay only when you scale. 0.1% settlement fee — 15x cheaper than Stripe.",
+    "The t402 protocol is open-source under Apache 2.0 — always free. For managed checkout, billing, and hosted facilitator see t402 Pay at pay.t402.io.",
   openGraph: {
-    title: "t402 Pricing - Free to Start, Scales with You",
+    title: "t402 Pricing — Free Open Protocol + t402 Pay Service",
     description:
-      "Free tier: 1,000 tx/month. Builder: 0.1%. Scale: $99/mo + 0.08%. Enterprise: custom. No hidden fees.",
+      "Apache 2.0 protocol, free forever. Self-host the facilitator at 0% fees. Need managed checkout? See pay.t402.io.",
   },
 };
-
-const tiers = [
-  {
-    name: "Free",
-    price: "$0",
-    period: "forever",
-    description: "For developers and testing",
-    highlight: false,
-    features: [
-      "1,000 transactions/month",
-      "All 13 chain mechanisms",
-      "4 SDK languages",
-      "Public facilitator",
-      "Community support",
-      "No credit card required",
-    ],
-    cta: "Get API Key",
-    ctaHref: "https://facilitator.t402.io/register",
-  },
-  {
-    name: "Builder",
-    price: "0.1%",
-    period: "per transaction",
-    description: "For apps with real users",
-    highlight: true,
-    features: [
-      "100,000 transactions/month",
-      "100 RPM rate limit",
-      "Webhook callbacks",
-      "Settlement fee tracking",
-      "Priority support",
-      "Cross-chain bridging",
-    ],
-    cta: "Start Building",
-    ctaHref: "https://facilitator.t402.io/register",
-  },
-  {
-    name: "Scale",
-    price: "$99",
-    period: "/month + 0.08%",
-    description: "For growing businesses",
-    highlight: false,
-    features: [
-      "1,000,000 transactions/month",
-      "1,000 RPM rate limit",
-      "Analytics dashboard",
-      "Revenue reports",
-      "Dedicated RPC endpoints",
-      "Email + chat support",
-    ],
-    cta: "Contact Sales",
-    ctaHref: "mailto:sales@t402.io",
-  },
-  {
-    name: "Enterprise",
-    price: "Custom",
-    period: "tailored",
-    description: "For platforms at scale",
-    highlight: false,
-    features: [
-      "Unlimited transactions",
-      "10,000+ RPM",
-      "99.99% SLA guarantee",
-      "Dedicated facilitator",
-      "Custom settlement logic",
-      "Dedicated account manager",
-    ],
-    cta: "Talk to Us",
-    ctaHref: "mailto:enterprise@t402.io",
-  },
-];
-
-const comparisons = [
-  { provider: "Stripe (stablecoin)", fee: "1.50%", savings: "15x cheaper" },
-  { provider: "BitPay", fee: "1.00%", savings: "10x cheaper" },
-  { provider: "Coinbase Commerce", fee: "1.00%", savings: "10x cheaper" },
-  { provider: "NOWPayments", fee: "0.50%", savings: "5x cheaper" },
-  { provider: "t402 (Builder)", fee: "0.10%", savings: "—", highlight: true },
-  { provider: "Self-hosted t402", fee: "0.00%", savings: "Free forever", highlight: true },
-];
 
 function CheckIcon() {
   return (
@@ -100,6 +20,24 @@ function CheckIcon() {
     </svg>
   );
 }
+
+const protocolFeatures = [
+  "Full protocol specification — schemes, transports, extensions",
+  "Reference SDKs in TypeScript, Go, Python, Java",
+  "Self-host the facilitator (Apache 2.0 Go binary)",
+  "All 47 networks supported",
+  "Run unlimited transactions — no SaaS quota",
+  "Community-driven on GitHub",
+];
+
+const payFeatures = [
+  "Hosted facilitator — no infrastructure to run",
+  "Merchant dashboard for transactions, refunds, payouts",
+  "Hosted invoice pages + embedded checkout widget",
+  "Subscription billing primitives",
+  "Webhooks with retry + replay protection",
+  "Coinbase Commerce migration path",
+];
 
 export default function PricingPage() {
   return (
@@ -113,146 +51,147 @@ export default function PricingPage() {
               Pricing
             </span>
             <h1 className="mt-4 text-4xl font-bold tracking-tight md:text-5xl" style={{ color: "#FAFAFA" }}>
-              Simple, transparent pricing
+              Open protocol. Optional managed service.
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg" style={{ color: "#A1A1AA" }}>
-              Free for developers. Pay only when you scale.
-              <br />
-              Self-host the facilitator for 0% fees — forever.
+              The t402 protocol is open-source under Apache 2.0 — always free. If you want
+              managed checkout, billing, and hosted facilitator infrastructure, t402 Pay is
+              the commercial sibling service.
             </p>
           </div>
         </section>
 
-        {/* Tier Cards */}
+        {/* Two cards: protocol vs service */}
         <section className="section-light py-24">
-          <div className="mx-auto max-w-7xl px-6">
-            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
-              {tiers.map((tier) => (
+          <div className="mx-auto max-w-5xl px-6">
+            <div className="grid gap-8 lg:grid-cols-2">
+              {/* Card 1: Open protocol */}
+              <div
+                className="relative rounded-2xl p-8"
+                style={{
+                  backgroundColor: "var(--bg-section-light)",
+                  border: "2px solid #50AF95",
+                }}
+              >
                 <div
-                  key={tier.name}
-                  className="relative rounded-2xl p-8"
+                  className="absolute -top-3 left-6 rounded-full px-3 py-1 text-xs font-semibold"
+                  style={{ backgroundColor: "#50AF95", color: "#0A0A0B" }}
+                >
+                  Open source
+                </div>
+                <h2 className="text-2xl font-semibold" style={{ color: "var(--text-on-light)" }}>
+                  t402 Protocol
+                </h2>
+                <p className="mt-2 text-sm" style={{ color: "var(--text-on-light-tertiary)" }}>
+                  Apache 2.0 — free forever
+                </p>
+                <div className="mt-6">
+                  <span className="text-5xl font-bold" style={{ color: "var(--text-on-light)" }}>
+                    $0
+                  </span>
+                  <span className="ml-2 text-sm" style={{ color: "var(--text-on-light-tertiary)" }}>
+                    no quota, no fee
+                  </span>
+                </div>
+                <ul className="mt-8 space-y-3">
+                  {protocolFeatures.map((feature) => (
+                    <li key={feature} className="flex items-start gap-2 text-sm" style={{ color: "var(--text-on-light-secondary)" }}>
+                      <CheckIcon />
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+                <Link
+                  href="https://docs.t402.io/getting-started/quickstart"
+                  className="mt-8 block w-full rounded-xl py-3 text-center text-sm font-medium transition-all duration-300"
                   style={{
-                    backgroundColor: tier.highlight ? "var(--bg-section-light)" : "var(--bg-section-light-alt)",
-                    border: tier.highlight ? "2px solid #50AF95" : "1px solid var(--border-light)",
+                    backgroundColor: "#50AF95",
+                    color: "#0A0A0B",
                   }}
                 >
-                  {tier.highlight && (
-                    <div
-                      className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full px-3 py-1 text-xs font-semibold"
-                      style={{ backgroundColor: "#50AF95", color: "#0A0A0B" }}
-                    >
-                      Most Popular
-                    </div>
-                  )}
-                  <h3 className="text-lg font-semibold" style={{ color: "var(--text-on-light)" }}>
-                    {tier.name}
-                  </h3>
-                  <p className="mt-1 text-sm" style={{ color: "var(--text-on-light-tertiary)" }}>
-                    {tier.description}
-                  </p>
-                  <div className="mt-6">
-                    <span className="text-4xl font-bold" style={{ color: "var(--text-on-light)" }}>
-                      {tier.price}
-                    </span>
-                    <span className="ml-1 text-sm" style={{ color: "var(--text-on-light-tertiary)" }}>
-                      {tier.period}
-                    </span>
-                  </div>
-                  <ul className="mt-8 space-y-3">
-                    {tier.features.map((feature) => (
-                      <li key={feature} className="flex items-start gap-2 text-sm" style={{ color: "var(--text-on-light-secondary)" }}>
-                        <CheckIcon />
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
-                  <Link
-                    href={tier.ctaHref}
-                    className="mt-8 block w-full rounded-xl py-3 text-center text-sm font-medium transition-all duration-300"
-                    style={{
-                      backgroundColor: tier.highlight ? "#50AF95" : "var(--bg-section-light-alt)",
-                      color: tier.highlight ? "#0A0A0B" : "var(--text-on-light)",
-                      border: tier.highlight ? "none" : "1px solid var(--border-light)",
-                    }}
-                  >
-                    {tier.cta}
-                  </Link>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
+                  Start with the docs
+                </Link>
+              </div>
 
-        {/* Fee Comparison */}
-        <section className="section-dark py-24">
-          <div className="mx-auto max-w-3xl px-6">
-            <h2 className="mb-12 text-center text-3xl font-bold" style={{ color: "#FAFAFA" }}>
-              How we compare
-            </h2>
-            <div className="overflow-hidden rounded-2xl" style={{ border: "1px solid rgba(255,255,255,0.08)" }}>
-              <table className="w-full">
-                <thead>
-                  <tr style={{ backgroundColor: "#111113" }}>
-                    <th className="px-6 py-4 text-left text-sm font-medium" style={{ color: "#A1A1AA" }}>Provider</th>
-                    <th className="px-6 py-4 text-right text-sm font-medium" style={{ color: "#A1A1AA" }}>Fee</th>
-                    <th className="px-6 py-4 text-right text-sm font-medium" style={{ color: "#A1A1AA" }}>vs t402</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {comparisons.map((row) => (
-                    <tr
-                      key={row.provider}
-                      style={{
-                        backgroundColor: row.highlight ? "rgba(80,175,149,0.05)" : "transparent",
-                        borderTop: "1px solid rgba(255,255,255,0.05)",
-                      }}
-                    >
-                      <td className="px-6 py-4 text-sm font-medium" style={{ color: row.highlight ? "#50AF95" : "#FAFAFA" }}>
-                        {row.provider}
-                      </td>
-                      <td className="px-6 py-4 text-right text-sm" style={{ color: row.highlight ? "#50AF95" : "#A1A1AA" }}>
-                        {row.fee}
-                      </td>
-                      <td className="px-6 py-4 text-right text-sm" style={{ color: row.highlight ? "#50AF95" : "#71717A" }}>
-                        {row.savings}
-                      </td>
-                    </tr>
+              {/* Card 2: t402 Pay */}
+              <div
+                className="relative rounded-2xl p-8"
+                style={{
+                  backgroundColor: "var(--bg-section-light-alt)",
+                  border: "1px solid var(--border-light)",
+                }}
+              >
+                <div
+                  className="absolute -top-3 left-6 rounded-full px-3 py-1 text-xs font-semibold"
+                  style={{ backgroundColor: "#A1A1AA", color: "#0A0A0B" }}
+                >
+                  Managed service
+                </div>
+                <h2 className="text-2xl font-semibold" style={{ color: "var(--text-on-light)" }}>
+                  t402 Pay
+                </h2>
+                <p className="mt-2 text-sm" style={{ color: "var(--text-on-light-tertiary)" }}>
+                  Hosted checkout, billing, and facilitator
+                </p>
+                <div className="mt-6">
+                  <span className="text-2xl font-medium" style={{ color: "var(--text-on-light)" }}>
+                    See pricing at{" "}
+                    <span style={{ color: "#50AF95" }}>pay.t402.io</span>
+                  </span>
+                </div>
+                <ul className="mt-8 space-y-3">
+                  {payFeatures.map((feature) => (
+                    <li key={feature} className="flex items-start gap-2 text-sm" style={{ color: "var(--text-on-light-secondary)" }}>
+                      <CheckIcon />
+                      {feature}
+                    </li>
                   ))}
-                </tbody>
-              </table>
+                </ul>
+                <Link
+                  href="https://pay.t402.io"
+                  className="mt-8 block w-full rounded-xl py-3 text-center text-sm font-medium transition-all duration-300"
+                  style={{
+                    backgroundColor: "var(--bg-section-light)",
+                    color: "var(--text-on-light)",
+                    border: "1px solid var(--border-light)",
+                  }}
+                >
+                  Visit t402 Pay
+                </Link>
+              </div>
             </div>
-            <p className="mt-6 text-center text-sm" style={{ color: "#71717A" }}>
-              Self-host your own facilitator for 0% fees.{" "}
-              <Link href="https://docs.t402.io" className="underline" style={{ color: "#50AF95" }}>
-                Learn how
-              </Link>
+
+            <p className="mt-12 text-center text-sm" style={{ color: "var(--text-on-light-tertiary)" }}>
+              The protocol and the service are independent. You can self-host the facilitator
+              for 0% fees and never touch t402 Pay — both paths are fully supported.
             </p>
           </div>
         </section>
 
         {/* CTA */}
-        <section className="section-light py-24">
+        <section className="section-dark py-24">
           <div className="mx-auto max-w-4xl px-6 text-center">
-            <h2 className="text-3xl font-bold" style={{ color: "var(--text-on-light)" }}>
-              Start accepting USDT payments in 5 minutes
+            <h2 className="text-3xl font-bold" style={{ color: "#FAFAFA" }}>
+              Ready to add t402 to your service?
             </h2>
-            <p className="mx-auto mt-4 max-w-xl text-lg" style={{ color: "var(--text-on-light-secondary)" }}>
-              No credit card. No KYC. No minimum commitment.
+            <p className="mx-auto mt-4 max-w-xl text-lg" style={{ color: "#A1A1AA" }}>
+              The 10-minute quickstart covers signing, settlement, and your first payment
+              on testnet.
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-4">
               <Link
-                href="https://facilitator.t402.io/register"
+                href="https://docs.t402.io/getting-started/quickstart"
                 className="rounded-xl px-8 py-3 text-sm font-medium transition-all hover:opacity-90"
                 style={{ backgroundColor: "#50AF95", color: "#0A0A0B" }}
               >
-                Get Free API Key
+                Read the quickstart
               </Link>
               <Link
-                href="https://docs.t402.io/getting-started/quickstart"
+                href="https://github.com/t402-io/t402"
                 className="rounded-xl px-8 py-3 text-sm font-medium"
-                style={{ border: "1px solid var(--border-light)", color: "var(--text-on-light)" }}
+                style={{ border: "1px solid rgba(255, 255, 255, 0.12)", color: "#FAFAFA" }}
               >
-                View Quickstart
+                View on GitHub
               </Link>
             </div>
           </div>
