@@ -324,10 +324,12 @@ A receiver of a `SignedResolution` MUST:
 
 | SDK | Package | Status |
 |---|---|---|
-| TypeScript | `@t402/extensions/dispute` | Planned (tracked in PROTOCOL-REFINEMENT-PLAN Phase B Week 7) |
-| Go | `sdks/go/extensions/dispute/` | Planned |
-| Python | `t402.extensions.dispute` | Planned |
-| Java | `extensions.dispute` module | Planned |
+| TypeScript | `@t402/extensions/dispute` | **Reference** (shipped 2026-05-28, commit 5b89f266; 58 unit tests) |
+| Go | `sdks/go/extensions/dispute/` | **Reference** (shipped 2026-05-29, commit 7c5dc373; 37 unit tests) |
+| Python | `t402.extensions.dispute` | **Reference** (shipped 2026-05-29, commit c2ee983f; 64 unit tests) |
+| Java | `io.t402.extensions.dispute` | **Reference** (shipped 2026-05-29, commit 20caf42a; 63 unit tests) |
+
+All four SDKs implement the same Dispute envelope, ResolutionPayload, verdict ↔ settledAmount consistency rule, seven-step `ValidateDispute` pipeline, and `facilitator` arbiterScheme handler. Cross-SDK byte-level interop is established by the shared EIP-712 domain (`name: "T402Dispute"`, `version: "1"`, `chainId: 1`) and identical typed-data tables for `Dispute` and `Resolution`.
 
 ## Security Considerations
 
