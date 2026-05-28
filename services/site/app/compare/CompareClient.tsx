@@ -339,6 +339,28 @@ function HighlightCard({
   );
 }
 
+interface X402Row {
+  feature: string;
+  t402: string | boolean;
+  x402: string | boolean;
+}
+
+const x402Comparison: X402Row[] = [
+  { feature: "exact scheme", t402: true, x402: true },
+  { feature: "upto scheme", t402: true, x402: true },
+  { feature: "authCapture scheme", t402: "Spec + SDK (Phase B)", x402: "Spec + EVM SDK" },
+  { feature: "batch-settlement scheme", t402: "Spec + SDK (Phase B)", x402: "Spec + EVM SDK + contract deployed" },
+  { feature: "MCP transport (AI agents)", t402: "33 tools", x402: "~10 tools" },
+  { feature: "A2A transport", t402: true, x402: true },
+  { feature: "USDT-on-TRON facilitator", t402: "Production", x402: "PR #2076 open since Jan" },
+  { feature: "TON USDT support", t402: "4 SDKs production", x402: "Spec merged; TS facilitator WIP" },
+  { feature: "ERC-4337 / ERC-7710 smart wallets", t402: "Full impl, 4 SDKs", x402: "ERC-6492 merged" },
+  { feature: "Dispute / refund envelope", t402: "Draft extension", x402: false },
+  { feature: "Self-host facilitator (Apache 2.0)", t402: true, x402: true },
+  { feature: "SDK languages", t402: "TS, Go, Py, Java", x402: "TS, Go, Py, Java minimal" },
+  { feature: "WDK integration (Tether)", t402: "Structurally typed, compat-tested", x402: "Independent" },
+];
+
 const t402Strengths = [
   {
     title: "47 Networks",
@@ -411,7 +433,7 @@ export default function CompareClient() {
             />
             <HighlightCard
               title="Chains Supported"
-              value="44"
+              value="47"
               description="13 blockchain families"
             />
             <HighlightCard
@@ -499,6 +521,103 @@ export default function CompareClient() {
           >
             <ComparisonTable />
           </motion.div>
+        </div>
+      </section>
+
+      {/* Dark Section: T402 vs x402 (interop + leadership) */}
+      <section className="section-dark py-24 md:py-32">
+        <div className="mx-auto max-w-5xl px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center"
+          >
+            <span
+              className="text-xs font-semibold uppercase tracking-widest"
+              style={{ color: "#50AF95" }}
+            >
+              x402 Interop
+            </span>
+            <h2
+              className="mt-4 mb-4 text-3xl font-bold tracking-tight md:text-4xl"
+              style={{ color: "#FAFAFA" }}
+            >
+              t402 vs x402
+            </h2>
+            <p className="mx-auto mb-12 max-w-2xl text-base" style={{ color: "#A1A1AA" }}>
+              t402 is wire-compatible with x402, the open HTTP payment protocol maintained by
+              the x402 Foundation. The two protocols share schemes and transports.
+              t402 leads on dispute, USDT-on-TRON, and the WDK integration.
+            </p>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="overflow-hidden rounded-2xl"
+            style={{ border: "1px solid rgba(255,255,255,0.08)", background: "#111113" }}
+          >
+            <table className="w-full">
+              <thead>
+                <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+                  <th className="py-4 px-6 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: "#A1A1AA" }}>
+                    Feature
+                  </th>
+                  <th className="py-4 px-4 text-center">
+                    <div className="inline-flex flex-col items-center">
+                      <span className="text-lg font-bold" style={{ color: "#50AF95" }}>t402</span>
+                    </div>
+                  </th>
+                  <th className="py-4 px-4 text-center">
+                    <div className="inline-flex flex-col items-center">
+                      <span className="text-lg font-semibold" style={{ color: "#FAFAFA" }}>x402</span>
+                      <span className="text-xs" style={{ color: "#A1A1AA" }}>Foundation</span>
+                    </div>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {x402Comparison.map((row, index) => (
+                  <motion.tr
+                    key={row.feature}
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.3, delay: index * 0.03 }}
+                    style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}
+                  >
+                    <td className="py-4 px-6 text-sm font-medium" style={{ color: "#FAFAFA" }}>
+                      {row.feature}
+                    </td>
+                    <td
+                      className="py-4 px-4 text-center text-sm"
+                      style={{ backgroundColor: "rgba(80,175,149,0.05)", color: "#50AF95" }}
+                    >
+                      {typeof row.t402 === "boolean"
+                        ? row.t402
+                          ? <CheckIcon className="mx-auto" style={{ color: "#50AF95" }} />
+                          : <XIcon className="mx-auto" style={{ color: "#CBD5E0" }} />
+                        : row.t402}
+                    </td>
+                    <td className="py-4 px-4 text-center text-sm" style={{ color: "#A1A1AA" }}>
+                      {typeof row.x402 === "boolean"
+                        ? row.x402
+                          ? <CheckIcon className="mx-auto" style={{ color: "#A1A1AA" }} />
+                          : <XIcon className="mx-auto" style={{ color: "#CBD5E0" }} />
+                        : row.x402}
+                    </td>
+                  </motion.tr>
+                ))}
+              </tbody>
+            </table>
+          </motion.div>
+
+          <p className="mt-6 text-center text-sm" style={{ color: "#71717A" }}>
+            t402 ships upstream-PR-ready specs for dispute, USDT-on-TRON, and TON
+            facilitator coverage.
+          </p>
         </div>
       </section>
 
