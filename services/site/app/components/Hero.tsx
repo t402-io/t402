@@ -47,8 +47,9 @@ export function Hero() {
           transition={{ duration: 0.6, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
           className="mx-auto mt-6 max-w-2xl text-lg text-foreground-secondary md:text-xl"
         >
-          HTTP-native stablecoin payments across 47 networks and 13 blockchain families. Zero fees.
-          Instant settlement. Built for AI agents.
+          HTTP-native stablecoin payments across 47 networks. Wire-compatible with x402, plus
+          authCapture + dispute layer and USDT-on-TRON. Compatible with Tether&apos;s open-source WDK.
+          Built for AI agents.
         </motion.p>
 
         {/* CTA Buttons */}
