@@ -1,128 +1,84 @@
-"use client";
-
 import Link from "next/link";
-import { motion } from "motion/react";
-import { BackgroundVideo } from "./BackgroundVideo";
-
-const stats = [
-  { value: "47", label: "Networks" },
-  { value: "71", label: "Kinds" },
-  { value: "4", label: "SDKs" },
-  { value: "$0", label: "Fees" },
-];
 
 export function Hero() {
   return (
-    <section className="section-dark relative flex min-h-screen items-center justify-center overflow-hidden">
-      {/* Video background */}
-      <BackgroundVideo src="/videos/neonblobs.mp4" />
+    <section className="section-light pt-32 pb-24 md:pt-44 md:pb-32">
+      <div className="mx-auto max-w-editorial px-6">
+        {/* N° mark */}
+        <div className="mb-12 flex items-center justify-between text-[var(--color-foreground-secondary)]">
+          <span className="editorial-mark text-base md:text-lg">N° 402</span>
+          <span className="eyebrow">Volume 02 · Specification</span>
+        </div>
 
-      {/* Dark overlay gradient */}
-      <div
-        className="pointer-events-none absolute inset-0 z-[1]"
-        style={{
-          background:
-            "linear-gradient(180deg, rgba(10,10,11,0.6) 0%, rgba(10,10,11,0.4) 40%, rgba(10,10,11,0.7) 100%)",
-        }}
-      />
+        {/* Top rule */}
+        <hr className="rule" />
 
-      {/* Content */}
-      <div className="relative z-[2] mx-auto max-w-7xl px-6 py-32 text-center">
-        {/* Main heading */}
-        <motion.h1
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="text-5xl font-bold tracking-tight text-white md:text-7xl lg:text-8xl"
-        >
-          The HTTP Payment Protocol
+        {/* Headline */}
+        <h1 className="mt-12 mb-8 text-balance font-serif text-[2.75rem] leading-[1.05] tracking-[-0.02em] text-[var(--color-foreground)] md:mt-16 md:mb-10 md:text-[4.5rem] lg:text-[5.5rem]">
+          The Stablecoin
           <br />
-          <span className="text-gradient">for Stablecoins</span>
-        </motion.h1>
+          Payment Protocol
+          <br />
+          for the Internet.
+        </h1>
 
-        {/* Subtitle */}
-        <motion.p
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
-          className="mx-auto mt-6 max-w-2xl text-lg text-foreground-secondary md:text-xl"
-        >
-          HTTP-native stablecoin payments across 47 networks. Wire-compatible with x402, plus
-          authCapture + dispute layer and USDT-on-TRON. Compatible with Tether&apos;s open-source WDK.
-          Built for AI agents.
-        </motion.p>
+        {/* Bottom rule */}
+        <hr className="rule" />
 
-        {/* CTA Buttons */}
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-          className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row"
-        >
+        {/* Subtitle + meta */}
+        <div className="mt-10 grid gap-12 md:mt-14 md:grid-cols-12">
+          <p className="text-balance text-base leading-[1.65] text-[var(--color-foreground-secondary)] md:col-span-7 md:text-lg">
+            An open HTTP-native payment protocol. Wire-compatible with x402,
+            plus the authCapture + dispute layer and USDT-on-TRON.
+            Compatible with Tether&apos;s open-source WDK. Built for AI agents.
+          </p>
+
+          <dl className="space-y-3 text-sm md:col-span-5">
+            <div className="flex items-baseline justify-between border-b border-[var(--color-rule-soft)] pb-2">
+              <dt className="eyebrow">Networks</dt>
+              <dd className="font-serif text-base text-[var(--color-foreground)]">47</dd>
+            </div>
+            <div className="flex items-baseline justify-between border-b border-[var(--color-rule-soft)] pb-2">
+              <dt className="eyebrow">Kinds</dt>
+              <dd className="font-serif text-base text-[var(--color-foreground)]">71</dd>
+            </div>
+            <div className="flex items-baseline justify-between border-b border-[var(--color-rule-soft)] pb-2">
+              <dt className="eyebrow">SDKs</dt>
+              <dd className="font-serif text-base italic text-[var(--color-foreground)]">
+                TS · Go · Py · Java
+              </dd>
+            </div>
+            <div className="flex items-baseline justify-between border-b border-[var(--color-rule-soft)] pb-2">
+              <dt className="eyebrow">Protocol fees</dt>
+              <dd className="font-serif text-base text-[var(--color-foreground)]">$0.00</dd>
+            </div>
+            <div className="flex items-baseline justify-between border-b border-[var(--color-rule-soft)] pb-2">
+              <dt className="eyebrow">License</dt>
+              <dd className="font-serif text-base text-[var(--color-foreground)]">Apache 2.0</dd>
+            </div>
+          </dl>
+        </div>
+
+        {/* CTAs */}
+        <div className="mt-14 flex flex-col items-start gap-6 md:flex-row md:items-baseline md:gap-10">
           <Link
             href="https://docs.t402.io/getting-started/quickstart"
-            className="inline-flex items-center justify-center rounded-xl bg-brand px-8 py-4 text-lg font-semibold text-[#0A0A0B] transition-all hover:bg-brand-secondary hover:shadow-glow"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-serif text-lg italic text-[var(--color-foreground)] underline decoration-[var(--color-brand)] decoration-2 underline-offset-[6px] transition-colors hover:text-[var(--color-brand)]"
           >
-            Get Started
+            Read the specification →
           </Link>
           <Link
-            href="https://t402.io/t402-whitepaper.pdf"
-            className="inline-flex items-center justify-center rounded-xl border border-white/20 px-8 py-4 text-lg font-semibold text-white backdrop-blur transition-all hover:border-white/40 hover:bg-white/5"
+            href="https://github.com/t402-io/t402"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-serif text-lg italic text-[var(--color-foreground-secondary)] transition-colors hover:text-[var(--color-foreground)]"
           >
-            Read Whitepaper
+            View on GitHub →
           </Link>
-        </motion.div>
-
-        {/* Stats bar */}
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.45, ease: [0.16, 1, 0.3, 1] }}
-          className="mt-16 flex items-center justify-center"
-        >
-          <div className="flex items-center divide-x divide-white/20">
-            {stats.map((stat) => (
-              <div key={stat.label} className="px-6 text-center sm:px-10">
-                <div className="text-2xl font-bold text-white">{stat.value}</div>
-                <div className="mt-1 text-sm text-foreground-secondary">
-                  {stat.label}
-                </div>
-              </div>
-            ))}
-          </div>
-        </motion.div>
+        </div>
       </div>
-
-      {/* Scroll indicator */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.2, duration: 0.8 }}
-        className="absolute bottom-8 left-1/2 z-[2] -translate-x-1/2"
-      >
-        <motion.div
-          animate={{ y: [0, 8, 0] }}
-          transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-          className="flex flex-col items-center gap-2"
-        >
-          <span className="text-xs tracking-widest text-foreground-tertiary uppercase">
-            Scroll
-          </span>
-          <svg
-            className="h-5 w-5 text-foreground-tertiary"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M19 14l-7 7m0 0l-7-7"
-            />
-          </svg>
-        </motion.div>
-      </motion.div>
     </section>
   );
 }
