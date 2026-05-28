@@ -33,10 +33,9 @@ function TelegramIcon({ className }: { className?: string }) {
 
 const footerLinks = {
   protocol: [
-    { label: "Features", href: "/features" },
-    { label: "Chains", href: "/chains" },
-    { label: "Why T402", href: "/compare" },
+    { label: "SDKs", href: "/sdks" },
     { label: "Whitepaper", href: "/t402-whitepaper.pdf", external: true },
+    { label: "Specs", href: "https://github.com/t402-io/t402/tree/main/specs", external: true },
   ],
   developers: [
     { label: "Documentation", href: "https://docs.t402.io", external: true },

@@ -79,9 +79,6 @@ function ExternalLinkIcon() {
 
 const navLinks = [
   { href: "/sdks", label: "SDKs" },
-  { href: "/chains", label: "Chains" },
-  { href: "/features", label: "Features" },
-  { href: "/compare", label: "Why T402" },
   { href: "https://pay.t402.io", label: "Pay", external: true },
   { href: "https://docs.t402.io", label: "Docs", external: true },
 ];
