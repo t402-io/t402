@@ -364,8 +364,10 @@ class TestGetAllBalancesReal:
         assert not result.isError
         text = result.content[0].text
         assert "RPC timeout" in text
-        # Should have been called for all 9 networks
-        assert call_count == 9
+        # Should have been called for all 25 networks (19 USDT0 + Base +
+        # Avalanche + 4 USDT-legacy-only).
+        from t402.mcp.constants import ALL_NETWORKS
+        assert call_count == len(ALL_NETWORKS)
 
 
 class TestPayReal:
@@ -700,12 +702,13 @@ class TestBridgeReal:
 
     @pytest.mark.asyncio
     async def test_bridge_unbridgeable_chain(self):
-        """Test bridge with non-bridgeable chain."""
+        """Test bridge from a chain with no LayerZero endpoint."""
         config = ServerConfig(demo_mode=True)
         server = T402McpServer(config)
 
+        # Base is USDC-only — no USDT0 deployment, not in BRIDGEABLE_CHAINS.
         result = await server._handle_bridge({
-            "fromChain": "polygon",
+            "fromChain": "base",
             "toChain": "ethereum",
             "amount": "100",
             "recipient": SAMPLE_RECIPIENT,

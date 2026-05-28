@@ -165,22 +165,28 @@ public final class EvmConstants {
     // Legacy USDT Token Addresses (no EIP-3009, use approve+transferFrom)
     // ============================================================
 
-    /** Legacy USDT addresses indexed by network. */
-    public static final Map<String, String> USDT_LEGACY_ADDRESSES = Map.of(
-        BSC_MAINNET, "0x55d398326f99059fF775485246999027B3197955",
-        AVALANCHE_MAINNET, "0x9702230A8Ea53601f5cD2dc00fDBc13d4dF4A8c7",
-        FANTOM_MAINNET, "0x049d68029688eabf473097a2fc38ef61633a3c7a",
-        CELO_MAINNET, "0x48065fbBE25f71C9282ddf5e1cD6D6A887483D5e",
-        KAIA_MAINNET, "0xd077a400968890eacc75cdc901f0356c943e4fdb"
+    /** Legacy USDT addresses indexed by network.
+     *  Cross-SDK consistency: matches TS USDT_LEGACY_ADDRESSES in
+     *  sdks/typescript/packages/mechanisms/evm/src/tokens.ts (7 chains). */
+    public static final Map<String, String> USDT_LEGACY_ADDRESSES = Map.ofEntries(
+        Map.entry(ETHEREUM_MAINNET, "0xdAC17F958D2ee523a2206206994597C13D831ec7"),
+        Map.entry(POLYGON_MAINNET, "0xc2132D05D31c914a87C6611C10748AEb04B58e8F"),
+        Map.entry(BSC_MAINNET, "0x55d398326f99059fF775485246999027B3197955"),
+        Map.entry(AVALANCHE_MAINNET, "0x9702230A8Ea53601f5cD2dc00fDBc13d4dF4A8c7"),
+        Map.entry(FANTOM_MAINNET, "0x049d68029688eabf473097a2fc38ef61633a3c7a"),
+        Map.entry(CELO_MAINNET, "0x48065fbBE25f71C9282ddf5e1cD6D6A887483D5e"),
+        Map.entry(KAIA_MAINNET, "0xd077a400968890eacc75cdc901f0356c943e4fdb")
     );
 
     /** Legacy USDT EIP-712 domain names (varies per network). */
-    public static final Map<String, String> USDT_LEGACY_TOKEN_NAMES = Map.of(
-        BSC_MAINNET, "Tether USD",
-        AVALANCHE_MAINNET, "TetherToken",
-        FANTOM_MAINNET, "Frapped USDT",
-        CELO_MAINNET, "Tether USD",
-        KAIA_MAINNET, "Tether USD"
+    public static final Map<String, String> USDT_LEGACY_TOKEN_NAMES = Map.ofEntries(
+        Map.entry(ETHEREUM_MAINNET, "TetherUSD"),
+        Map.entry(POLYGON_MAINNET, "TetherUSD"),
+        Map.entry(BSC_MAINNET, "Tether USD"),
+        Map.entry(AVALANCHE_MAINNET, "TetherToken"),
+        Map.entry(FANTOM_MAINNET, "Frapped USDT"),
+        Map.entry(CELO_MAINNET, "Tether USD"),
+        Map.entry(KAIA_MAINNET, "Tether USD")
     );
 
     /** Legacy USDT decimals override (BNB and Celo use 18 instead of 6). */

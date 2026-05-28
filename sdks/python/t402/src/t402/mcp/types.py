@@ -5,7 +5,16 @@ from typing import Any, Literal, Optional
 
 
 # Supported networks
+# Source of truth: sdks/typescript/packages/mechanisms/evm/src/tokens.ts
+# USDT0 networks (19): ethereum, arbitrum, ink, berachain, unichain, polygon,
+#   mantle, optimism, plasma, sei, conflux, monad, rootstock, xlayer, flare,
+#   corn, hyperevm, megaeth, stable
+# USDT legacy networks (7): ethereum, polygon, bsc, avalanche, fantom, celo, kaia
+# USAT networks (1): ethereum
+# USDC networks (6): ethereum, base, arbitrum, optimism, polygon, avalanche
+# Base is USDC-only (no USDT0 or legacy USDT).
 SupportedNetwork = Literal[
+    # USDT0 mainnet networks
     "ethereum",
     "base",
     "arbitrum",
@@ -15,10 +24,29 @@ SupportedNetwork = Literal[
     "ink",
     "berachain",
     "unichain",
+    "mantle",
+    "plasma",
+    "sei",
+    "conflux",
+    "monad",
+    "rootstock",
+    "xlayer",
+    "flare",
+    "corn",
+    "hyperevm",
+    "megaeth",
+    "stable",
+    # USDT-legacy-only mainnet networks (no USDT0)
+    "bsc",
+    "fantom",
+    "celo",
+    "kaia",
 ]
 
 # Supported tokens
-SupportedToken = Literal["USDC", "USDT", "USDT0"]
+# USAT = Tether America (Tether's federally-regulated US stablecoin,
+# ERC-2612 permit only, no EIP-3009)
+SupportedToken = Literal["USDC", "USDT", "USDT0", "USAT"]
 
 
 @dataclass

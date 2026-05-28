@@ -1,5 +1,11 @@
 """
 Chain configurations and token addresses for T402 WDK.
+
+Source of truth for token addresses:
+  sdks/typescript/packages/mechanisms/evm/src/tokens.ts
+
+Cross-SDK alignment (2026-05-28 W2 sprint): 19 USDT0 chains,
+7 USDT legacy chains, 1 USAT chain, 6 USDC chains.
 """
 
 from typing import Dict, List, Optional
@@ -8,6 +14,7 @@ from .types import ChainConfig, TokenInfo, NetworkType
 
 # Default chain configurations
 DEFAULT_CHAINS: Dict[str, ChainConfig] = {
+    # USDT0 mainnet networks
     "ethereum": ChainConfig(
         chain_id=1,
         network="eip155:1",
@@ -50,6 +57,140 @@ DEFAULT_CHAINS: Dict[str, ChainConfig] = {
         rpc_url="https://polygon-rpc.com",
         network_type=NetworkType.EVM,
     ),
+    "unichain": ChainConfig(
+        chain_id=130,
+        network="eip155:130",
+        name="unichain",
+        rpc_url="https://mainnet.unichain.org",
+        network_type=NetworkType.EVM,
+    ),
+    "optimism": ChainConfig(
+        chain_id=10,
+        network="eip155:10",
+        name="optimism",
+        rpc_url="https://mainnet.optimism.io",
+        network_type=NetworkType.EVM,
+    ),
+    "mantle": ChainConfig(
+        chain_id=5000,
+        network="eip155:5000",
+        name="mantle",
+        rpc_url="https://rpc.mantle.xyz",
+        network_type=NetworkType.EVM,
+    ),
+    "plasma": ChainConfig(
+        chain_id=9745,
+        network="eip155:9745",
+        name="plasma",
+        rpc_url="https://rpc.plasma.to",
+        network_type=NetworkType.EVM,
+    ),
+    "sei": ChainConfig(
+        chain_id=1329,
+        network="eip155:1329",
+        name="sei",
+        rpc_url="https://evm-rpc.sei-apis.com",
+        network_type=NetworkType.EVM,
+    ),
+    "conflux": ChainConfig(
+        chain_id=1030,
+        network="eip155:1030",
+        name="conflux",
+        rpc_url="https://evm.confluxrpc.com",
+        network_type=NetworkType.EVM,
+    ),
+    "monad": ChainConfig(
+        chain_id=143,
+        network="eip155:143",
+        name="monad",
+        rpc_url="https://rpc.monad.xyz",
+        network_type=NetworkType.EVM,
+    ),
+    "rootstock": ChainConfig(
+        chain_id=30,
+        network="eip155:30",
+        name="rootstock",
+        rpc_url="https://public-node.rsk.co",
+        network_type=NetworkType.EVM,
+    ),
+    "xlayer": ChainConfig(
+        chain_id=196,
+        network="eip155:196",
+        name="xlayer",
+        rpc_url="https://rpc.xlayer.tech",
+        network_type=NetworkType.EVM,
+    ),
+    "flare": ChainConfig(
+        chain_id=14,
+        network="eip155:14",
+        name="flare",
+        rpc_url="https://flare-api.flare.network/ext/C/rpc",
+        network_type=NetworkType.EVM,
+    ),
+    "corn": ChainConfig(
+        chain_id=21000000,
+        network="eip155:21000000",
+        name="corn",
+        rpc_url="https://maizenet-rpc.usecorn.com",
+        network_type=NetworkType.EVM,
+    ),
+    "hyperevm": ChainConfig(
+        chain_id=999,
+        network="eip155:999",
+        name="hyperevm",
+        rpc_url="https://rpc.hyperliquid.xyz/evm",
+        network_type=NetworkType.EVM,
+    ),
+    "megaeth": ChainConfig(
+        chain_id=4326,
+        network="eip155:4326",
+        name="megaeth",
+        rpc_url="https://carrot.megaeth.com/rpc",
+        network_type=NetworkType.EVM,
+    ),
+    "stable": ChainConfig(
+        chain_id=988,
+        network="eip155:988",
+        name="stable",
+        rpc_url="https://rpc.stable.network",
+        network_type=NetworkType.EVM,
+    ),
+    "avalanche": ChainConfig(
+        chain_id=43114,
+        network="eip155:43114",
+        name="avalanche",
+        rpc_url="https://api.avax.network/ext/bc/C/rpc",
+        network_type=NetworkType.EVM,
+    ),
+    # USDT legacy-only mainnet networks
+    "bsc": ChainConfig(
+        chain_id=56,
+        network="eip155:56",
+        name="bsc",
+        rpc_url="https://bsc-dataseed.binance.org",
+        network_type=NetworkType.EVM,
+    ),
+    "fantom": ChainConfig(
+        chain_id=250,
+        network="eip155:250",
+        name="fantom",
+        rpc_url="https://rpc.ftm.tools",
+        network_type=NetworkType.EVM,
+    ),
+    "celo": ChainConfig(
+        chain_id=42220,
+        network="eip155:42220",
+        name="celo",
+        rpc_url="https://forno.celo.org",
+        network_type=NetworkType.EVM,
+    ),
+    "kaia": ChainConfig(
+        chain_id=8217,
+        network="eip155:8217",
+        name="kaia",
+        rpc_url="https://public-en.node.kaia.io",
+        network_type=NetworkType.EVM,
+    ),
     # Testnets
     "arbitrum-sepolia": ChainConfig(
         chain_id=421614,
@@ -68,116 +209,163 @@ DEFAULT_CHAINS: Dict[str, ChainConfig] = {
 }
 
 
-# USDT0 token addresses by chain (supports EIP-3009)
+# USDT0 OFT contract addresses (LayerZero bridgeable, EIP-3009 + EIP-2612)
 USDT0_ADDRESSES: Dict[str, str] = {
     "ethereum": "0x6C96dE32CEa08842dcc4058c14d3aaAD7Fa41dee",
     "arbitrum": "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
     "ink": "0x0200C29006150606B650577BBE7B6248F58470c1",
     "berachain": "0x779Ded0c9e1022225f8E0630b35a9b54bE713736",
     "unichain": "0x9151434b16b9763660705744891fA906F660EcC5",
+    "polygon": "0xc2132D05D31c914a87C6611C10748AEb04B58e8F",
+    "mantle": "0x779Ded0c9e1022225f8E0630b35a9b54bE713736",
+    "optimism": "0x01bFF41798a0BcF287b996046Ca68b395DbC1071",
+    "plasma": "0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb",
+    "sei": "0x9151434b16b9763660705744891fA906F660EcC5",
+    "conflux": "0xaf37E8B6C9ED7f6318979f56Fc287d76c30847ff",
+    "monad": "0xe7cd86e13AC4309349F30B3435a9d337750fC82D",
+    "rootstock": "0x779dED0C9e1022225F8e0630b35A9B54Be713736",
+    "xlayer": "0x779Ded0c9e1022225f8E0630b35a9b54bE713736",
+    "flare": "0xe7cd86e13AC4309349F30B3435a9d337750fC82D",
+    "corn": "0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb",
+    "hyperevm": "0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb",
+    "megaeth": "0xb8ce59fc3717ada4c02eadf9682a9e934f625ebb",
+    "stable": "0x779Ded0c9e1022225f8E0630b35a9b54bE713736",
 }
 
 
 # USDC token addresses by chain
 USDC_ADDRESSES: Dict[str, str] = {
     "ethereum": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
-    "arbitrum": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
     "base": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+    "arbitrum": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+    "optimism": "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85",
     "polygon": "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359",
+    "avalanche": "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E",
 }
 
 
-# Legacy USDT addresses (no EIP-3009 support)
+# Legacy USDT addresses (no EIP-3009 support). For chains where USDT0
+# exists, prefer USDT0 over legacy USDT.
 USDT_LEGACY_ADDRESSES: Dict[str, str] = {
     "ethereum": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
     "polygon": "0xc2132D05D31c914a87C6611C10748AEb04B58e8F",
+    "bsc": "0x55d398326f99059fF775485246999027B3197955",
+    "avalanche": "0x9702230A8Ea53601f5cD2dc00fDBc13d4dF4A8c7",
+    "fantom": "0x049d68029688eabf473097a2fc38ef61633a3c7a",
+    "celo": "0x48065fbBE25f71C9282ddf5e1cD6D6A887483D5e",
+    "kaia": "0xd077a400968890eacc75cdc901f0356c943e4fdb",
 }
+
+
+# USAT contract addresses by chain.
+# USAT = Tether America USD (federally-regulated US stablecoin).
+# Supports EIP-2612 permit (can use `upto` scheme); does NOT support
+# EIP-3009 (must use `exact-legacy` scheme for `exact`).
+USAT_ADDRESSES: Dict[str, str] = {
+    "ethereum": "0x07041776f5007aca2a54844f50503a18a72a8b68",
+}
+
+
+def _usdt0_token(chain: str) -> TokenInfo:
+    """Build a USDT0 TokenInfo for a chain."""
+    return TokenInfo(
+        address=USDT0_ADDRESSES[chain],
+        symbol="USDT0",
+        name="TetherToken",
+        decimals=6,
+        supports_eip3009=True,
+    )
+
+
+def _usdc_token(chain: str) -> TokenInfo:
+    """Build a USDC TokenInfo for a chain."""
+    return TokenInfo(
+        address=USDC_ADDRESSES[chain],
+        symbol="USDC",
+        name="USD Coin",
+        decimals=6,
+        supports_eip3009=True,
+    )
+
+
+def _usdt_legacy_token(chain: str) -> TokenInfo:
+    """Build a legacy USDT TokenInfo for a chain."""
+    # BSC and Celo USDT use 18 decimals; others use 6.
+    decimals = 18 if chain in ("bsc", "celo") else 6
+    return TokenInfo(
+        address=USDT_LEGACY_ADDRESSES[chain],
+        symbol="USDT",
+        name="Tether USD",
+        decimals=decimals,
+        supports_eip3009=False,
+    )
+
+
+def _usat_token(chain: str) -> TokenInfo:
+    """Build a USAT TokenInfo for a chain."""
+    return TokenInfo(
+        address=USAT_ADDRESSES[chain],
+        symbol="USAT",
+        name="Tether America USD",
+        decimals=6,
+        supports_eip3009=False,
+    )
 
 
 # All supported tokens per chain
 CHAIN_TOKENS: Dict[str, List[TokenInfo]] = {
     "ethereum": [
-        TokenInfo(
-            address=USDT0_ADDRESSES["ethereum"],
-            symbol="USDT0",
-            name="TetherToken",
-            decimals=6,
-            supports_eip3009=True,
-        ),
-        TokenInfo(
-            address=USDC_ADDRESSES["ethereum"],
-            symbol="USDC",
-            name="USD Coin",
-            decimals=6,
-            supports_eip3009=True,
-        ),
-        TokenInfo(
-            address=USDT_LEGACY_ADDRESSES["ethereum"],
-            symbol="USDT",
-            name="Tether USD",
-            decimals=6,
-            supports_eip3009=False,
-        ),
+        _usdt0_token("ethereum"),
+        _usdc_token("ethereum"),
+        _usat_token("ethereum"),
+        _usdt_legacy_token("ethereum"),
     ],
     "arbitrum": [
-        TokenInfo(
-            address=USDT0_ADDRESSES["arbitrum"],
-            symbol="USDT0",
-            name="TetherToken",
-            decimals=6,
-            supports_eip3009=True,
-        ),
-        TokenInfo(
-            address=USDC_ADDRESSES["arbitrum"],
-            symbol="USDC",
-            name="USD Coin",
-            decimals=6,
-            supports_eip3009=True,
-        ),
+        _usdt0_token("arbitrum"),
+        _usdc_token("arbitrum"),
     ],
     "base": [
-        TokenInfo(
-            address=USDC_ADDRESSES["base"],
-            symbol="USDC",
-            name="USD Coin",
-            decimals=6,
-            supports_eip3009=True,
-        ),
+        _usdc_token("base"),
     ],
     "ink": [
-        TokenInfo(
-            address=USDT0_ADDRESSES["ink"],
-            symbol="USDT0",
-            name="TetherToken",
-            decimals=6,
-            supports_eip3009=True,
-        ),
+        _usdt0_token("ink"),
     ],
     "berachain": [
-        TokenInfo(
-            address=USDT0_ADDRESSES["berachain"],
-            symbol="USDT0",
-            name="TetherToken",
-            decimals=6,
-            supports_eip3009=True,
-        ),
+        _usdt0_token("berachain"),
+    ],
+    "unichain": [
+        _usdt0_token("unichain"),
     ],
     "polygon": [
-        TokenInfo(
-            address=USDC_ADDRESSES["polygon"],
-            symbol="USDC",
-            name="USD Coin",
-            decimals=6,
-            supports_eip3009=True,
-        ),
-        TokenInfo(
-            address=USDT_LEGACY_ADDRESSES["polygon"],
-            symbol="USDT",
-            name="Tether USD",
-            decimals=6,
-            supports_eip3009=False,
-        ),
+        _usdt0_token("polygon"),
+        _usdc_token("polygon"),
+        _usdt_legacy_token("polygon"),
     ],
+    "optimism": [
+        _usdt0_token("optimism"),
+        _usdc_token("optimism"),
+    ],
+    "avalanche": [
+        _usdc_token("avalanche"),
+        _usdt_legacy_token("avalanche"),
+    ],
+    "mantle": [_usdt0_token("mantle")],
+    "plasma": [_usdt0_token("plasma")],
+    "sei": [_usdt0_token("sei")],
+    "conflux": [_usdt0_token("conflux")],
+    "monad": [_usdt0_token("monad")],
+    "rootstock": [_usdt0_token("rootstock")],
+    "xlayer": [_usdt0_token("xlayer")],
+    "flare": [_usdt0_token("flare")],
+    "corn": [_usdt0_token("corn")],
+    "hyperevm": [_usdt0_token("hyperevm")],
+    "megaeth": [_usdt0_token("megaeth")],
+    "stable": [_usdt0_token("stable")],
+    # USDT legacy-only chains
+    "bsc": [_usdt_legacy_token("bsc")],
+    "fantom": [_usdt_legacy_token("fantom")],
+    "celo": [_usdt_legacy_token("celo")],
+    "kaia": [_usdt_legacy_token("kaia")],
 }
 
 

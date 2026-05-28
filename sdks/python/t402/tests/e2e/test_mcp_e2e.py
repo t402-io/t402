@@ -455,12 +455,20 @@ class TestMcpToolDefinitionsE2E:
                 for req in tool.inputSchema.required:
                     assert req in (tool.inputSchema.properties or {})
 
-    def test_9_supported_networks(self):
-        """Test all 9 networks are supported."""
-        assert len(ALL_NETWORKS) == 9
+    def test_supported_networks_full_coverage(self):
+        """All 25 networks are supported (19 USDT0 chains + 6 with
+        USDT-legacy-only or USDC-only)."""
+        assert len(ALL_NETWORKS) == 25
         expected = {
-            "ethereum", "base", "arbitrum", "optimism",
-            "polygon", "avalanche", "ink", "berachain", "unichain",
+            # USDT0 mainnet networks (19)
+            "ethereum", "arbitrum", "ink", "berachain", "unichain",
+            "polygon", "mantle", "optimism", "plasma", "sei",
+            "conflux", "monad", "rootstock", "xlayer", "flare",
+            "corn", "hyperevm", "megaeth", "stable",
+            # USDC-only / chain-of-interest
+            "base", "avalanche",
+            # USDT legacy-only networks (4)
+            "bsc", "fantom", "celo", "kaia",
         }
         assert set(ALL_NETWORKS) == expected
 

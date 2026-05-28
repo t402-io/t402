@@ -43,7 +43,8 @@ class TestConstants:
     def test_native_symbols(self):
         """Test native symbols are defined."""
         assert NATIVE_SYMBOLS["ethereum"] == "ETH"
-        assert NATIVE_SYMBOLS["polygon"] == "MATIC"
+        # Polygon rebranded MATIC → POL in 2024-09.
+        assert NATIVE_SYMBOLS["polygon"] == "POL"
         assert NATIVE_SYMBOLS["avalanche"] == "AVAX"
 
     def test_explorer_urls(self):
@@ -58,11 +59,18 @@ class TestConstants:
         assert len(USDC_ADDRESSES["ethereum"]) == 42
 
     def test_all_networks(self):
-        """Test ALL_NETWORKS list."""
-        assert len(ALL_NETWORKS) == 9
+        """Test ALL_NETWORKS list — 19 USDT0 chains + 4 USDT-legacy-only
+        chains + Base (USDC-only) + Avalanche (USDC + USDT-legacy)."""
+        assert len(ALL_NETWORKS) == 25
         assert "ethereum" in ALL_NETWORKS
         assert "base" in ALL_NETWORKS
         assert "arbitrum" in ALL_NETWORKS
+        # USDT-legacy-only chains
+        assert "bsc" in ALL_NETWORKS
+        assert "kaia" in ALL_NETWORKS
+        # New USDT0 chains
+        assert "mantle" in ALL_NETWORKS
+        assert "monad" in ALL_NETWORKS
 
 
 class TestConstantFunctions:
@@ -98,14 +106,23 @@ class TestConstantFunctions:
         assert usdc_eth is not None
         assert usdc_eth.startswith("0x")
 
-        usdt_arb = get_token_address("arbitrum", "USDT")
-        assert usdt_arb is not None
+        # Legacy USDT lives on chains without USDT0 (e.g., BSC, Polygon).
+        # Arbitrum's USDT is actually USDT0 — no legacy USDT.
+        usdt_bsc = get_token_address("bsc", "USDT")
+        assert usdt_bsc is not None
 
         usdt0_ink = get_token_address("ink", "USDT0")
         assert usdt0_ink is not None
 
+        # USAT only on Ethereum mainnet.
+        usat_eth = get_token_address("ethereum", "USAT")
+        assert usat_eth is not None
+        assert usat_eth.lower() == "0x07041776f5007aca2a54844f50503a18a72a8b68"
+
         # Unsupported
         assert get_token_address("base", "USDT") is None
+        assert get_token_address("arbitrum", "USDT") is None
+        assert get_token_address("base", "USAT") is None
 
     def test_get_explorer_tx_url(self):
         """Test get_explorer_tx_url function."""
