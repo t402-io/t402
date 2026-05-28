@@ -47,6 +47,8 @@ The `exact` scheme transfers a specific amount for each request.
 | [BTC](./schemes/exact/scheme_exact_btc.md) | Bitcoin (PSBT) |
 | [Lightning](./schemes/exact/scheme_exact_lightning.md) | Lightning Network (BOLT11) |
 | [SUI](./schemes/exact/scheme_exact_sui.md) | Sui blockchain **(DRAFT)** |
+| [EVM — ERC-4337 variant](./schemes/exact/scheme_exact_evm_erc4337.md) | EVM smart-account payments via UserOperation + paymaster |
+| [EVM — ERC-7710 variant](./schemes/exact/scheme_exact_evm_erc7710.md) | EVM delegation-based payments (agent-mediated budgets) |
 
 Additional chains implemented in SDKs (exact-direct variant — on-chain transfer as proof):
 NEAR (NEP-141), Aptos (Fungible Asset), Tezos (FA2), Polkadot (Assets Pallet), Stacks (SIP-010), Cosmos/Noble (MsgSend, all SDKs).
@@ -78,18 +80,57 @@ The `permit2-proxy` scheme extends `permit2` with witness-based facilitator bind
 | [Overview](./schemes/permit2-proxy/scheme_permit2_proxy.md) | Scheme specification |
 | [EVM](./schemes/permit2-proxy/scheme_permit2_proxy_evm.md) | Ethereum/EVM chains (Permit2 + Witness proxy) |
 
+### Auth-Capture Scheme (Draft)
+
+The `auth-capture` scheme supports two-phase authorize-then-capture and single-shot charge-with-refund. Closes the refund/reversibility gap in `exact`. Interoperable with x402's auth-capture scheme.
+
+| Implementation | Description |
+|----------------|-------------|
+| [Overview](./schemes/auth-capture/scheme_auth_capture.md) | Scheme specification **(DRAFT)** |
+| [EVM](./schemes/auth-capture/scheme_auth_capture_evm.md) | EIP-3009 + Permit2 against canonical `AuthCaptureEscrow` **(DRAFT)** |
+
+### Batch-Settlement Scheme (Draft)
+
+The `batch-settlement` scheme enables high-throughput, low-cost payments via cumulative voucher channels with batched on-chain claims. Supports dynamic pricing. Interoperable with x402's batch-settlement scheme.
+
+| Implementation | Description |
+|----------------|-------------|
+| [Overview](./schemes/batch-settlement/scheme_batch_settlement.md) | Scheme specification **(DRAFT)** |
+| [EVM](./schemes/batch-settlement/scheme_batch_settlement_evm.md) | Canonical `x402BatchSettlement` payment channels **(DRAFT)** |
+
+## Token Coverage
+
+The `t402` protocol routes Tether-issued and Tether-compatible USD tokens via deterministic scheme selection.
+
+| Reference | Description |
+|-----------|-------------|
+| [USDT Token Coverage](./usdt-tokens.md) | Canonical routing of USDT0 / USDC / USAT / Legacy USDT across 30+ networks; scheme + extension selection algorithm |
+
+## Facilitator
+
+The optional facilitator service handles verification and settlement on the server's behalf.
+
+| Reference | Description |
+|-----------|-------------|
+| [Facilitator v2 API Overview](./facilitator-v2-overview.md) | 8 endpoint categories of the reference facilitator (v2.0.0); required headers (Idempotency-Key, X-API-Key, X-Request-ID); compatibility promises for self-host implementations |
+
 ## Extensions
 
 Extensions enable modular optional functionality beyond core payment mechanics.
 
 | Extension | Key | Description |
 |-----------|-----|-------------|
+| [AP2 Integration](./extensions/ap2-integration.md) | `ap2` | Google Agent Payments Protocol mandates wrapped around t402 (A2A transport) |
 | [Bazaar](./extensions/bazaar.md) | `bazaar` | Resource discovery and cataloging |
+| [Dispute](./extensions/dispute.md) | `dispute` | Cryptographic dispute / resolution envelopes — t402-leading novel contribution **(DRAFT)** |
+| [EIP-2612 Gas Sponsoring](./extensions/eip2612-gas-sponsoring.md) | `eip2612GasSponsoring` | Gasless ERC-20 payments via EIP-2612 permit + facilitator forwarding |
+| [ERC-20 Approval Gas Sponsoring](./extensions/erc20-approval-gas-sponsoring.md) | `erc20ApprovalGasSponsoring` | Gasless ERC-20 payments for non-permit tokens |
+| [ERC-8004](./extensions/erc8004-integration.md) | `erc8004` | Trustless AI agent identity, reputation, and validation registries |
+| [Offer and Receipt](./extensions/offer-and-receipt.md) | `offer-receipt` | Cryptographic commitments — server-signed offers and post-settlement receipts |
+| [OpenAPI x-t402](./extensions/openapi-x-t402.md) | `x-t402` | Spec-time annotation declaring t402 payment requirements in OpenAPI documents |
+| [Payment DNS](./extensions/payment-dns.md) | `.well-known/t402.json` | Domain-level service discovery for t402-enabled APIs |
 | [Payment Identifier](./extensions/payment-identifier.md) | `paymentId` | Unique identifiers for correlation and idempotency |
 | [Sign-In-With-X](./extensions/sign-in-with-x.md) | `siwx` | CAIP-122 wallet-based identity assertions |
-| [ERC-8004](./extensions/erc8004-integration.md) | `erc8004` | Trustless AI agent identity and reputation |
-| [EIP-2612 Gas Sponsor](./extensions/eip2612-gas-sponsoring.md) | `eip2612GasSponsor` | Gas sponsoring via EIP-2612 permits |
-| [ERC-20 Approval Gas](./extensions/erc20-approval-gas-sponsoring.md) | `erc20ApprovalGas` | Gas sponsoring via ERC-20 approvals |
 
 See [extensions/README.md](./extensions/README.md) for the full extension guide and proposal template.
 
