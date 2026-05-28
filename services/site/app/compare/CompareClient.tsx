@@ -695,11 +695,11 @@ export default function CompareClient() {
                 View SDKs
               </Link>
               <Link
-                href="/playground"
+                href="https://docs.t402.io/getting-started/quickstart"
                 className="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-base font-medium transition-all duration-300 hover:bg-white/5"
                 style={{ border: "1px solid rgba(255,255,255,0.2)", color: "#FAFAFA" }}
               >
-                Try Playground
+                Read Quickstart
               </Link>
             </div>
           </motion.div>

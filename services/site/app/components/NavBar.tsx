@@ -86,7 +86,6 @@ const navLinks = [
   { href: "/pricing", label: "Pricing" },
   { href: "/use-cases", label: "Use Cases" },
   { href: "/compare", label: "Why T402" },
-  { href: "/playground", label: "Playground" },
   { href: "https://pay.t402.io", label: "Pay", external: true },
   { href: "https://docs.t402.io", label: "Docs", external: true },
 ];
