@@ -276,13 +276,6 @@ function ChainCard({ chain }: { chain: Chain }) {
       {/* Links */}
       <div className="flex gap-3 pt-4" style={{ borderTop: "1px solid rgba(0,0,0,0.06)" }}>
         <Link
-          href={`/chains/${chain.id}`}
-          className="flex items-center gap-1.5 text-sm font-medium transition-colors"
-          style={{ color: "#50AF95" }}
-        >
-          Details
-        </Link>
-        <Link
           href={chain.explorerUrl}
           target="_blank"
           rel="noopener noreferrer"
