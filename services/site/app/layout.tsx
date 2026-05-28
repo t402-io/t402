@@ -18,7 +18,7 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "T402 - Open-source HTTP Payment Protocol for Stablecoins",
   description:
-    "T402 is an open-source HTTP-native payment protocol for stablecoins. Pay with USDT, USDC, and other ERC-20 / TRC-20 / TON tokens across 47 networks (EVM, Solana, TON, TRON, NEAR, Aptos, and more). Low fees. Fast settlement. Built for AI agents.",
+    "T402 is an open-source HTTP-native payment protocol for stablecoins. Pay with USDT, USDC, and other ERC-20 / TRC-20 / TON tokens across 47 networks (EVM, Solana, TON, TRON, NEAR, Aptos, and more). Zero protocol fees. Instant settlement. Wire-compatible with x402. Built for AI agents.",
   keywords: [
     "USDT",
     "USDT0",
@@ -115,7 +115,7 @@ const jsonLd = {
       description:
         "Open-source SDKs for HTTP-native stablecoin payments across multiple blockchains",
       downloadUrl: "https://www.npmjs.com/package/@t402/core",
-      softwareVersion: "2.8.0",
+      softwareVersion: "2.9.0",
       programmingLanguage: ["TypeScript", "Python", "Go", "Java"],
     },
   ],

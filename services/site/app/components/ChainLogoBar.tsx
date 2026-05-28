@@ -26,7 +26,7 @@ export function ChainLogoBar() {
                 {family.name}
               </span>
               <span className="text-xs text-[var(--text-on-light-tertiary)]">
-                {family.count} networks
+                {family.count} {family.count === 1 ? "network" : "networks"}
               </span>
             </div>
           ))}
