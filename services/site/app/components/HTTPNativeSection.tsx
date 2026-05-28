@@ -171,7 +171,10 @@ export function HTTPNativeSection() {
                 variants={fadeInUp}
                 className="text-sm sm:text-base font-medium text-[var(--text-on-light-secondary)] leading-relaxed text-center md:text-left"
               >
-                T402 is built into existing HTTP requests, with no additional communication required.
+                T402 turns HTTP 402 &ldquo;Payment Required&rdquo; into a real
+                protocol. The server signals payment terms in the response;
+                the client replies with a signed stablecoin authorization on
+                the next request. No WebSockets, no polling, no SDK lock-in.
               </motion.p>
             </motion.div>
           </div>
