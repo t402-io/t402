@@ -21,7 +21,7 @@ export default function Error({
     >
       <div className="mx-auto max-w-editorial w-full">
         <div className="mb-10 flex items-baseline justify-between text-[var(--color-foreground-secondary)]">
-          <span className="editorial-mark text-base md:text-lg">N° 500</span>
+          <span className="editorial-mark text-base md:text-lg">T402.500</span>
           <span className="eyebrow">Errata</span>
         </div>
 

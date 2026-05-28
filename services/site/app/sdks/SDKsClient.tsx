@@ -226,7 +226,7 @@ export default function SDKsClient() {
       <div className="mx-auto max-w-editorial px-6">
         {/* Page mark */}
         <div className="mb-10 flex items-baseline justify-between">
-          <span className="editorial-mark text-base md:text-lg">N° 402.SDK</span>
+          <span className="editorial-mark text-base md:text-lg">T402.SDK</span>
           <span className="eyebrow">Build with T402</span>
         </div>
 

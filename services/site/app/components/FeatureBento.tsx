@@ -32,7 +32,7 @@ export function FeatureBento() {
       <div className="mx-auto max-w-editorial px-6">
         {/* Section mark */}
         <div className="mb-10 flex items-baseline justify-between">
-          <span className="editorial-mark text-base md:text-lg">N° 02</span>
+          <span className="editorial-mark text-base md:text-lg">T402.02</span>
           <span className="eyebrow">Features</span>
         </div>
 

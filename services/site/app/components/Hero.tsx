@@ -4,9 +4,9 @@ export function Hero() {
   return (
     <section className="section-light pt-32 pb-24 md:pt-44 md:pb-32">
       <div className="mx-auto max-w-editorial px-6">
-        {/* N° mark */}
+        {/* T402 mark */}
         <div className="mb-12 flex items-center justify-between text-[var(--color-foreground-secondary)]">
-          <span className="editorial-mark text-base md:text-lg">N° 402</span>
+          <span className="editorial-mark text-base md:text-lg">T402</span>
           <span className="eyebrow">Volume 02 · Specification</span>
         </div>
 

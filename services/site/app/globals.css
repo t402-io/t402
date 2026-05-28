@@ -309,7 +309,7 @@ a {
   max-width: var(--max-width-editorial);
 }
 
-/* Editorial mark — "N° 402" etc. */
+/* Editorial mark — "T402" / "T402.SDK" / "T402.404" etc. */
 @utility editorial-mark {
   font-family: var(--font-serif);
   font-style: italic;

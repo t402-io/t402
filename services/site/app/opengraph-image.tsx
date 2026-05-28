@@ -31,7 +31,7 @@ export default async function Image() {
             fontSize: "22px",
           }}
         >
-          <span style={{ fontStyle: "italic", color: "#50AF95" }}>N° 402</span>
+          <span style={{ fontStyle: "italic", color: "#50AF95" }}>T402</span>
           <span
             style={{
               fontFamily: "Arial, sans-serif",

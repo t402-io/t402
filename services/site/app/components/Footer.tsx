@@ -98,7 +98,7 @@ export function Footer() {
           style={{ color: "rgba(250, 250, 247, 0.5)" }}
         >
           <span className="editorial-mark text-base" style={{ color: "var(--color-brand)" }}>
-            N° 402
+            T402
           </span>
           <span className="eyebrow">Back cover</span>
         </div>

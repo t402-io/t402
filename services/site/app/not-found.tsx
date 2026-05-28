@@ -13,7 +13,7 @@ export default function NotFound() {
       <main className="flex flex-1 items-center justify-center px-6 py-24">
         <div className="mx-auto max-w-editorial w-full">
           <div className="mb-10 flex items-baseline justify-between text-[var(--color-foreground-secondary)]">
-            <span className="editorial-mark text-base md:text-lg">N° 404</span>
+            <span className="editorial-mark text-base md:text-lg">T402.404</span>
             <span className="eyebrow">Page not found</span>
           </div>
 

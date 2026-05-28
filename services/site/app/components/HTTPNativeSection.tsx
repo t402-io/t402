@@ -101,7 +101,7 @@ export function HTTPNativeSection() {
       <div className="mx-auto max-w-editorial px-6">
         {/* Section mark */}
         <div className="mb-10 flex items-baseline justify-between">
-          <span className="editorial-mark text-base md:text-lg">N° 01</span>
+          <span className="editorial-mark text-base md:text-lg">T402.01</span>
           <span className="eyebrow">Mechanism</span>
         </div>
 

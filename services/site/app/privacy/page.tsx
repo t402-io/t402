@@ -23,7 +23,7 @@ export default function PrivacyPage() {
         <article className="pb-24">
           <header className="max-w-editorial mx-auto px-6 pt-16 sm:pt-20 md:pt-28">
             <div className="mb-10 flex items-baseline justify-between text-foreground-secondary">
-              <span className="editorial-mark text-base md:text-lg">N° 402.PRIV</span>
+              <span className="editorial-mark text-base md:text-lg">T402.PRIV</span>
               <span className="eyebrow">Privacy Policy</span>
             </div>
             <hr className="rule" />

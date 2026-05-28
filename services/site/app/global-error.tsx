@@ -43,7 +43,7 @@ export default function GlobalError({
                 marginBottom: "24px",
               }}
             >
-              <span style={{ fontStyle: "italic", color: "#50AF95" }}>N° 500</span>
+              <span style={{ fontStyle: "italic", color: "#50AF95" }}>T402.500</span>
               <span
                 style={{
                   fontFamily:
