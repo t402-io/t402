@@ -12,7 +12,7 @@ const features = [
   {
     title: "Multi-Chain",
     description:
-      "47 networks across 13 blockchain families. EVM, Solana, TON, TRON, NEAR, Aptos, Tezos, Polkadot, Stacks, and Cosmos.",
+      "47 networks across 12 blockchain families. EVM, Solana, TON, TRON, NEAR, Aptos, Tezos, Polkadot, Stacks, Cosmos, Stellar, and Bitcoin.",
   },
   {
     title: "AI Agent Ready",

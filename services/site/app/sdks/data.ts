@@ -17,7 +17,7 @@ export const sdks: SDK[] = [
     name: "TypeScript",
     language: "TypeScript / JavaScript",
     description:
-      "Full-featured SDK for Node.js and browser environments. Server middleware, client utilities, framework integrations for 13 chain families.",
+      "Full-featured SDK for Node.js and browser environments. Server middleware, client utilities, framework integrations for 12 chain families.",
     icon: "typescript",
     installCommand: "pnpm add @t402/core",
     version: "2.9.0",
@@ -30,7 +30,7 @@ export const sdks: SDK[] = [
     name: "Python",
     language: "Python 3.10+",
     description:
-      "Async server-side SDK. Flask / FastAPI / Django middleware. 13 chain mechanisms.",
+      "Async server-side SDK. Flask / FastAPI / Django middleware. 12 chain mechanisms.",
     icon: "python",
     installCommand: "pip install t402",
     version: "1.13.1",
@@ -43,7 +43,7 @@ export const sdks: SDK[] = [
     name: "Go",
     language: "Go 1.24+",
     description:
-      "High-performance Go SDK. net/http compatible, 13 chain mechanisms, powers the reference facilitator.",
+      "High-performance Go SDK. net/http compatible, 12 chain mechanisms, powers the reference facilitator.",
     icon: "go",
     installCommand: "go get github.com/t402-io/t402/sdks/go",
     version: "1.13.1",

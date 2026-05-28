@@ -283,7 +283,7 @@ t402 info eip155:8453
 
 Legend: ✅ Complete | ❌ Not Available
 
-**Total Supported Networks: 52** across 11 blockchain families (81 network+scheme kinds)
+**Total Supported Networks: 47** across 12 blockchain families (71 network+scheme kinds)
 
 ## Latest Releases
 
