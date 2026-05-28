@@ -139,8 +139,6 @@ export default function RootLayout({
     <html lang="en" className={`${geist.variable} ${jetbrainsMono.variable} ${sourceSerif.variable} scroll-smooth`}>
       <head>
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-        <link rel="icon" type="image/png" href="/favicon.png" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <meta name="apple-mobile-web-app-title" content="T402" />
         <link rel="manifest" href="/site.webmanifest" />
         <script
