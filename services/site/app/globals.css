@@ -1,48 +1,49 @@
 @import "tailwindcss";
 
 /* =============================================================================
-   T402 Design System - Premium Corporate Theme
-   Supports dark-on-dark and light-background section variants
+   T402 Design System — Swiss / Editorial
+   Cream over warm white, ink over warm gray, serif headlines, emerald accent.
+   Dark section variant retained for Footer (back-cover contrast).
    ============================================================================= */
 
 @theme {
-  /* Background Colors */
-  --color-background: #0A0A0B;
-  --color-background-secondary: #111113;
-  --color-background-tertiary: #18181B;
-  --color-background-elevated: #232326;
-  --color-background-inverse: #FAFAFA;
+  /* Backgrounds (editorial cream) */
+  --color-background: #FAFAF7;
+  --color-background-secondary: #F5F2EB;
+  --color-background-tertiary: #EFEBE1;
+  --color-background-elevated: #FFFFFF;
+  --color-background-inverse: #0F0F0F;
 
   /* Section Backgrounds */
-  --bg-section-light: #FFFFFF;
-  --bg-section-light-alt: #F7FAF9;
-  --bg-section-dark: #0A0A0B;
-  --bg-section-dark-alt: #111113;
+  --bg-section-light: #FAFAF7;
+  --bg-section-light-alt: #F5F2EB;
+  --bg-section-dark: #0F0F0F;
+  --bg-section-dark-alt: #1A1A1A;
 
-  /* Text Colors */
-  --color-foreground: #FAFAFA;
-  --color-foreground-secondary: #A1A1AA;
-  --color-foreground-tertiary: #71717A;
-  --color-foreground-inverse: #0A0A0B;
+  /* Text (ink over warm gray) */
+  --color-foreground: #0F0F0F;
+  --color-foreground-secondary: #5A5750;
+  --color-foreground-tertiary: #918C82;
+  --color-foreground-inverse: #FAFAF7;
 
-  /* Text on Light Sections */
-  --text-on-light: #1A1A2E;
-  --text-on-light-secondary: #4A5568;
-  --text-on-light-tertiary: #718096;
+  /* Text on Light Sections — identical to root since we are light-mode */
+  --text-on-light: #0F0F0F;
+  --text-on-light-secondary: #5A5750;
+  --text-on-light-tertiary: #918C82;
 
-  /* Brand Colors - Tether Green */
+  /* Brand — emerald demoted to small accent (hex unchanged) */
   --color-brand: #50AF95;
   --color-brand-secondary: #26A17B;
   --color-brand-accent: #1BA27A;
-  --color-brand-muted: rgba(80, 175, 149, 0.1);
+  --color-brand-muted: rgba(80, 175, 149, 0.08);
 
-  /* Semantic Colors */
+  /* Semantic */
   --color-success: #22C55E;
   --color-warning: #F59E0B;
   --color-error: #EF4444;
   --color-info: #3B82F6;
 
-  /* Chain Colors - EVM */
+  /* Chain colors — kept (still used for chain branding where needed) */
   --color-chain-ethereum: #627EEA;
   --color-chain-base: #0052FF;
   --color-chain-arbitrum: #28A0F0;
@@ -63,7 +64,6 @@
   --color-chain-hyperevm: #5AE4A8;
   --color-chain-megaeth: #FF4D6A;
   --color-chain-corn: #F5A623;
-  /* Chain Colors - Non-EVM */
   --color-chain-solana: #9945FF;
   --color-chain-ton: #0098EA;
   --color-chain-tron: #FF0000;
@@ -74,59 +74,53 @@
   --color-chain-stacks: #5546FF;
   --color-chain-cosmos: #6F7390;
 
-  /* Border Colors */
-  --color-border: #27272A;
-  --color-border-secondary: #3F3F46;
-  --color-border-tertiary: #52525B;
+  /* Borders (warm grays, ink rules) */
+  --color-border: #E5E2DA;
+  --color-border-secondary: #D5D1C8;
+  --color-border-tertiary: #B8B3A7;
   --color-border-focus: #50AF95;
-  --color-border-muted: rgba(255, 255, 255, 0.1);
+  --color-border-muted: rgba(15, 15, 15, 0.06);
 
-  /* Light Section Borders */
-  --border-light: rgba(0, 0, 0, 0.08);
-  --border-light-hover: rgba(0, 0, 0, 0.15);
+  --border-light: rgba(15, 15, 15, 0.08);
+  --border-light-hover: rgba(15, 15, 15, 0.15);
+  --color-rule-ink: #0F0F0F;
+  --color-rule-soft: rgba(15, 15, 15, 0.12);
 
-  /* Overlay Colors */
-  --color-overlay-light: rgba(255, 255, 255, 0.05);
-  --color-overlay-medium: rgba(255, 255, 255, 0.1);
-  --color-overlay-dark: rgba(0, 0, 0, 0.5);
-  --color-overlay-backdrop: rgba(0, 0, 0, 0.8);
+  /* Overlays (much lighter for cream theme) */
+  --color-overlay-light: rgba(15, 15, 15, 0.04);
+  --color-overlay-medium: rgba(15, 15, 15, 0.08);
+  --color-overlay-dark: rgba(15, 15, 15, 0.5);
+  --color-overlay-backdrop: rgba(15, 15, 15, 0.7);
 
-  /* Typography */
-  --font-sans: "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --font-mono: "JetBrains Mono", "Fira Code", "SF Mono", Consolas, monospace;
-  --font-display: "Geist", -apple-system, BlinkMacSystemFont, sans-serif;
+  /* Typography — serif headlines, sans body */
+  --font-sans: var(--font-geist-sans), "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: var(--font-jetbrains-mono), "JetBrains Mono", "SF Mono", Consolas, monospace;
+  --font-serif: var(--font-source-serif), "Source Serif 4", "Source Serif Pro", "Iowan Old Style", Georgia, serif;
+  --font-display: var(--font-serif);
 
   /* Layout */
   --max-width-container: 1440px;
   --max-width-section: 80rem;
+  --max-width-editorial: 64rem;
   --spacing-section: 7.5rem;
   --spacing-section-sm: 6rem;
 
-  /* Border Radius */
-  --radius-card: 1.25rem;
-  --radius-button: 0.75rem;
-  --radius-input: 0.625rem;
-  --radius-badge: 9999px;
+  /* Border Radius — sharper editorial values */
+  --radius-card: 0;
+  --radius-button: 0;
+  --radius-input: 0.25rem;
+  --radius-badge: 0;
 
-  /* Shadows (dark theme optimized) */
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.4);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
-  --shadow-glow: 0 0 40px rgba(80, 175, 149, 0.15);
-
-  /* Premium Light-Section Shadows */
-  --shadow-light-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06);
-  --shadow-light-md: 0 4px 12px rgba(0, 0, 0, 0.05), 0 2px 4px rgba(0, 0, 0, 0.04);
-  --shadow-light-lg: 0 12px 40px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.04);
-  --shadow-card-hover: 0 20px 60px rgba(0, 0, 0, 0.1), 0 8px 20px rgba(0, 0, 0, 0.06);
+  /* Shadows — only subtle warmth, no dark glows */
+  --shadow-light-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-light-md: 0 4px 12px rgba(0, 0, 0, 0.05);
+  --shadow-light-lg: 0 12px 40px rgba(0, 0, 0, 0.06);
 
   /* Motion */
   --duration-fast: 150ms;
   --duration-normal: 300ms;
   --duration-slow: 500ms;
   --easing-default: cubic-bezier(0.4, 0, 0.2, 1);
-  --easing-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 /* =============================================================================
@@ -146,15 +140,9 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   container-type: inline-size;
-  /* Prevent horizontal scroll on mobile */
   overflow-x: hidden;
 }
 
-/* =============================================================================
-   Mobile Touch Improvements
-   ============================================================================= */
-
-/* Minimum touch target size (44x44px recommended by Apple/Google) */
 @media (pointer: coarse) {
   button,
   a,
@@ -162,14 +150,8 @@ body {
     min-height: 44px;
     min-width: 44px;
   }
-
-  /* Disable hover effects on touch devices */
-  .group:hover .group-hover\:opacity-100 {
-    opacity: inherit;
-  }
 }
 
-/* Prevent tap highlight on iOS */
 button,
 a,
 input,
@@ -178,59 +160,61 @@ textarea {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Improve scrolling on iOS */
 .overflow-y-auto,
 .overflow-x-auto {
   -webkit-overflow-scrolling: touch;
 }
 
-/* Selection */
 ::selection {
-  background: var(--color-brand);
+  background: var(--color-foreground);
   color: var(--color-background);
 }
 
 /* =============================================================================
-   Typography
+   Typography — serif headlines, ink-on-cream
    ============================================================================= */
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-display);
-  letter-spacing: -0.025em;
-  line-height: 1.25;
+  letter-spacing: -0.015em;
+  line-height: 1.15;
+  font-weight: 500;
+  font-feature-settings: "ss01", "ss02", "kern";
 }
 
 h1 {
   font-size: 4rem;
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  line-height: 1.1;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
 }
 
 h2 {
-  font-size: 3rem;
-  font-weight: 600;
-  line-height: 1.2;
+  font-size: 2.5rem;
+  font-weight: 500;
+  line-height: 1.15;
 }
 
 h3 {
-  font-size: 2rem;
-  font-weight: 600;
+  font-size: 1.75rem;
+  font-weight: 500;
   line-height: 1.25;
 }
 
 p {
-  font-size: 1.125rem;
-  line-height: 1.7;
+  font-size: 1.0625rem;
+  line-height: 1.65;
 }
 
 code, pre, kbd, samp {
   font-family: var(--font-mono);
 }
 
-/* =============================================================================
-   Links
-   ============================================================================= */
+/* Italic mark color for editorial accents */
+em.mark {
+  color: var(--color-brand);
+  font-style: italic;
+}
 
 a {
   color: inherit;
@@ -238,17 +222,13 @@ a {
   transition: color var(--duration-normal) var(--easing-default);
 }
 
-/* =============================================================================
-   Focus States
-   ============================================================================= */
-
 :focus-visible {
   outline: 2px solid var(--color-border-focus);
   outline-offset: 2px;
 }
 
 /* =============================================================================
-   Scrollbar (dark theme)
+   Light scrollbar
    ============================================================================= */
 
 ::-webkit-scrollbar {
@@ -262,7 +242,7 @@ a {
 
 ::-webkit-scrollbar-thumb {
   background: var(--color-border-secondary);
-  border-radius: 4px;
+  border-radius: 0;
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -278,10 +258,10 @@ a {
   left: -9999px;
   z-index: 9999;
   padding: 0.75rem 1.5rem;
-  background: var(--color-brand);
+  background: var(--color-foreground);
   color: var(--color-background);
   font-weight: 500;
-  border-radius: 0 0 0.5rem 0;
+  border-radius: 0;
 }
 
 .skip-to-content:focus {
@@ -289,7 +269,6 @@ a {
   top: 0;
 }
 
-/* Screen reader only */
 .sr-only {
   position: absolute;
   width: 1px;
@@ -302,7 +281,6 @@ a {
   border: 0;
 }
 
-/* Reduced motion preference */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -323,33 +301,31 @@ a {
   margin-left: calc(50% - 50cqw);
 }
 
-@utility unset-full-bleed {
-  width: unset;
-  margin-left: unset;
-}
-
 @utility max-w-container {
   max-width: var(--max-width-container);
 }
 
-/* Text gradient utility */
-@utility text-gradient {
-  background: linear-gradient(135deg, var(--color-brand) 0%, var(--color-brand-secondary) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+@utility max-w-editorial {
+  max-width: var(--max-width-editorial);
 }
 
-/* Glow effect utility */
-@utility glow {
-  box-shadow: var(--shadow-glow);
+/* Editorial mark — "N° 402" etc. */
+@utility editorial-mark {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  color: var(--color-brand);
 }
 
-/* Glass effect utility */
-@utility glass {
-  background: rgba(17, 17, 19, 0.8);
-  backdrop-filter: blur(12px);
-  border: 1px solid var(--color-border-muted);
+/* Eyebrow — small caps tracked tag */
+@utility eyebrow {
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--color-foreground-secondary);
 }
 
 /* =============================================================================
@@ -368,72 +344,41 @@ a {
 
 .section-dark {
   background: var(--bg-section-dark);
-  color: var(--color-foreground);
+  color: var(--color-foreground-inverse);
 }
 
 .section-dark-alt {
   background: var(--bg-section-dark-alt);
-  color: var(--color-foreground);
+  color: var(--color-foreground-inverse);
 }
 
 /* =============================================================================
-   Card Styles
+   Editorial Horizontal Rules
    ============================================================================= */
 
-/* Light card (for light sections) */
-.card-elevated {
-  background: white;
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-card);
-  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+.rule {
+  border-top: 1px solid var(--color-rule-ink);
+  margin: 0;
 }
 
-.card-elevated:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-card-hover);
-  border-color: var(--border-light-hover);
+.rule-soft {
+  border-top: 1px solid var(--color-rule-soft);
+  margin: 0;
 }
 
-/* Dark card (for dark sections) */
-.card-elevated-dark {
-  background: var(--bg-section-dark-alt);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: var(--radius-card);
-  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.card-elevated-dark:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  border-color: rgba(255, 255, 255, 0.15);
+.rule-emerald {
+  border-top: 1px solid var(--color-brand);
+  margin: 0;
 }
 
 /* =============================================================================
-   Brand Gradients & Decorative Elements
-   ============================================================================= */
-
-/* Brand gradient text */
-.text-gradient-brand {
-  background: linear-gradient(135deg, #50AF95, #26A17B, #1BA27A);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* Premium subtle divider */
-.divider-subtle {
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(80, 175, 149, 0.2), transparent);
-}
-
-/* =============================================================================
-   Code Blocks
+   Code Blocks (light theme)
    ============================================================================= */
 
 pre {
-  background: var(--color-background-tertiary);
-  border: 1px solid var(--color-border);
-  border-radius: 0.5rem;
+  background: var(--color-background-secondary);
+  border: 1px solid var(--border-light);
+  border-radius: 0;
   padding: 1rem;
   overflow-x: auto;
   font-size: 0.875rem;
@@ -441,9 +386,9 @@ pre {
 }
 
 code {
-  background: var(--color-background-tertiary);
+  background: var(--color-background-secondary);
   padding: 0.125rem 0.375rem;
-  border-radius: 0.25rem;
+  border-radius: 0;
   font-size: 0.875em;
 }
 
@@ -452,70 +397,4 @@ pre code {
   padding: 0;
   border-radius: 0;
   font-size: inherit;
-}
-
-/* =============================================================================
-   Animations
-   ============================================================================= */
-
-@keyframes fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes fade-up {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes pulse-glow {
-  0%, 100% {
-    box-shadow: 0 0 20px rgba(80, 175, 149, 0.2);
-  }
-  50% {
-    box-shadow: 0 0 30px rgba(80, 175, 149, 0.4);
-  }
-}
-
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
-}
-
-/* Animation utilities */
-.animate-fade-in {
-  animation: fade-in var(--duration-normal) var(--easing-default);
-}
-
-.animate-fade-up {
-  animation: fade-up var(--duration-slow) var(--easing-default);
-}
-
-.animate-pulse-glow {
-  animation: pulse-glow 2s ease-in-out infinite;
-}
-
-.animate-shimmer {
-  background: linear-gradient(
-    90deg,
-    var(--color-background-tertiary) 0%,
-    var(--color-background-elevated) 50%,
-    var(--color-background-tertiary) 100%
-  );
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
 }

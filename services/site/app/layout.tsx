@@ -1,18 +1,26 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, JetBrains_Mono } from "next/font/google";
+import { Geist, JetBrains_Mono, Source_Serif_4 } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 
 const geist = Geist({
   subsets: ["latin"],
   display: "swap",
-  variable: "--font-sans",
+  variable: "--font-geist-sans",
 });
 
 const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
   display: "swap",
-  variable: "--font-mono",
+  variable: "--font-jetbrains-mono",
+});
+
+const sourceSerif = Source_Serif_4({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-source-serif",
+  weight: ["400", "500", "600", "700"],
+  style: ["normal", "italic"],
 });
 
 export const metadata: Metadata = {
@@ -125,7 +133,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
-  themeColor: "#0A0A0B",
+  themeColor: "#FAFAF7",
 };
 
 export default function RootLayout({
@@ -134,7 +142,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${geist.variable} ${jetbrainsMono.variable} scroll-smooth`}>
+    <html lang="en" className={`${geist.variable} ${jetbrainsMono.variable} ${sourceSerif.variable} scroll-smooth`}>
       <head>
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="icon" type="image/png" href="/favicon.png" />
@@ -166,13 +174,15 @@ gtag('config', 'G-7FRFFD0PH0');`}
         <aside
           aria-label="Trademark notice"
           style={{
-            background: "#0A0A0B",
-            color: "#52525B",
+            background: "#0F0F0F",
+            color: "#918C82",
             fontSize: "11px",
-            lineHeight: 1.5,
-            padding: "12px 24px",
+            lineHeight: 1.6,
+            padding: "16px 24px",
             textAlign: "center",
             borderTop: "1px solid rgba(255,255,255,0.04)",
+            fontFamily: "var(--font-sans)",
+            letterSpacing: "0.01em",
           }}
         >
           T402 is an independent open-source project. Not affiliated with,
