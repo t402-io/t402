@@ -26,7 +26,7 @@ export default function PrivacyPage() {
               Privacy Policy
             </h1>
             <p className="text-base text-foreground-tertiary mb-8">
-              Last updated: January 15, 2026
+              Last updated: May 28, 2026
             </p>
           </header>
 
@@ -34,7 +34,7 @@ export default function PrivacyPage() {
             {/* Introduction */}
             <div className="rounded-xl border border-border bg-background-secondary p-6">
               <p className="text-base leading-relaxed text-foreground-secondary">
-                T402 is an open-source protocol. This privacy policy covers the services operated by the T402 team: the website (t402.io), documentation (docs.t402.io), demo (demo.t402.io), and the facilitator service (facilitator.t402.io).
+                T402 is an open-source protocol. This privacy policy covers the services operated by the T402 team: the website (t402.io), documentation (docs.t402.io), demo (demo.t402.io), the facilitator service (facilitator.t402.io), and the commercial sibling service t402 Pay (pay.t402.io).
               </p>
             </div>
 

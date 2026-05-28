@@ -26,7 +26,7 @@ export default function TermsPage() {
               Terms of Service
             </h1>
             <p className="text-base text-foreground-tertiary mb-8">
-              Last updated: January 15, 2026
+              Last updated: May 28, 2026
             </p>
           </header>
 
@@ -43,7 +43,7 @@ export default function TermsPage() {
               <h2 className="text-2xl font-semibold mt-8">1. Definitions</h2>
               <ul className="list-disc pl-5 space-y-2 text-base leading-relaxed text-foreground-secondary">
                 <li><strong className="text-foreground">&quot;Protocol&quot;</strong>: The T402 HTTP 402 payment protocol specification and its implementations.</li>
-                <li><strong className="text-foreground">&quot;Services&quot;</strong>: The websites (t402.io, docs.t402.io, demo.t402.io), facilitator API (facilitator.t402.io), and related infrastructure operated by the T402 team.</li>
+                <li><strong className="text-foreground">&quot;Services&quot;</strong>: The websites (t402.io, docs.t402.io, demo.t402.io, pay.t402.io), facilitator API (facilitator.t402.io), and related infrastructure operated by the T402 team.</li>
                 <li><strong className="text-foreground">&quot;SDKs&quot;</strong>: The open-source software development kits published under the @t402 namespace on npm, PyPI, Go Modules, and Maven Central.</li>
                 <li><strong className="text-foreground">&quot;Facilitator&quot;</strong>: The service that verifies payment authorizations and executes on-chain settlements.</li>
                 <li><strong className="text-foreground">&quot;User&quot;</strong>: Any individual or entity that uses the Protocol, Services, or SDKs.</li>
@@ -54,7 +54,7 @@ export default function TermsPage() {
             <section className="space-y-4">
               <h2 className="text-2xl font-semibold mt-8">2. Open Source License</h2>
               <p className="text-base leading-relaxed text-foreground-secondary">
-                The T402 protocol specification and SDKs are released under the MIT License. You are free to use, modify, and distribute the code subject to the MIT License terms. The full license text is available in the{" "}
+                The T402 protocol specification and SDKs are released under the Apache 2.0 License. You are free to use, modify, and distribute the code subject to the Apache 2.0 License terms. The full license text is available in the{" "}
                 <Link href="https://github.com/t402-io/t402/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" className="text-brand hover:text-brand-secondary">
                   repository
                 </Link>.
@@ -136,7 +136,7 @@ export default function TermsPage() {
             <section className="space-y-4">
               <h2 className="text-2xl font-semibold mt-8">6. Intellectual Property</h2>
               <p className="text-base leading-relaxed text-foreground-secondary">
-                The T402 name, logo, and branding are trademarks of the T402 project. The open-source code is licensed under MIT. Documentation content is available for reference and educational use.
+                The T402 name, logo, and branding are trademarks of the T402 project. The open-source code is licensed under Apache 2.0. Documentation content is available for reference and educational use.
               </p>
               <p className="text-base leading-relaxed text-foreground-secondary">
                 You may use the T402 name to accurately describe compatibility with the protocol (e.g., &quot;T402-compatible&quot;) but may not imply official endorsement without permission.
