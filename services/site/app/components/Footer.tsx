@@ -51,6 +51,7 @@ const footerLinks = {
     { label: "FAQ", href: "/faq" },
     { label: "Brand Kit", href: "/brand" },
     { label: "Status", href: "/status" },
+    { label: "t402 Pay", href: "https://pay.t402.io", external: true },
   ],
   chains: [
     { label: "Ethereum", href: "/chains/ethereum" },
