@@ -3,9 +3,17 @@
 Date: 2026-03-24
 Source: github.com/coinbase/x402 (cloned to /tmp/x402-audit)
 
+> **Historical snapshot.** This audit predates x402 v2 (`auth-capture`,
+> `batch-settlement`, ERC-6492 counterfactual sigs). For current parity
+> status see the new t402 scheme specs:
+> [`auth-capture`](../schemes/auth-capture/scheme_auth_capture.md),
+> [`batch-settlement`](../schemes/batch-settlement/scheme_batch_settlement.md),
+> [`scheme_exact_evm_erc4337`](../schemes/exact/scheme_exact_evm_erc4337.md),
+> and the [USDT token coverage doc](../usdt-tokens.md).
+
 ## Executive Summary
 
-T402 and x402 are **95% wire-compatible**. The protocols share identical:
+T402 and x402 are **95% wire-compatible** at the v1 wire shape. The protocols share identical:
 - HTTP header names (`PAYMENT-REQUIRED`, `PAYMENT-SIGNATURE`, `PAYMENT-RESPONSE`)
 - Base64 JSON encoding in headers
 - PaymentRequirements field structure
