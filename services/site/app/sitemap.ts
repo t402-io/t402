@@ -5,25 +5,12 @@ export const dynamic = "force-static";
 
 const baseUrl = "https://t402.io";
 
-// All writing articles
-const writingArticles = [
-  "t402-launch",
-  "getting-started-express",
-  "ai-agents-mcp",
-  "gasless-payments",
-  "multichain-architecture",
-  "sdk-comparison",
-  "non-evm-chains",
-];
-
 // All feature pages
 const featurePages = [
   "gasless",
   "bridge",
   "multisig",
   "mcp",
-  "a2a",
-  "streaming",
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -92,12 +79,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.7,
     },
     {
-      url: `${baseUrl}/writing`,
-      lastModified: now,
-      changeFrequency: "weekly",
-      priority: 0.8,
-    },
-    {
       url: `${baseUrl}/terms`,
       lastModified: now,
       changeFrequency: "yearly",
@@ -119,14 +100,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
-  // Writing/blog article pages
-  const writingPages: MetadataRoute.Sitemap = writingArticles.map((slug) => ({
-    url: `${baseUrl}/writing/${slug}`,
-    lastModified: now,
-    changeFrequency: "monthly" as const,
-    priority: 0.6,
-  }));
-
   // Feature sub-pages
   const featureSubPages: MetadataRoute.Sitemap = featurePages.map((slug) => ({
     url: `${baseUrl}/features/${slug}`,
@@ -135,5 +108,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.6,
   }));
 
-  return [...staticPages, ...chainPages, ...writingPages, ...featureSubPages];
+  return [...staticPages, ...chainPages, ...featureSubPages];
 }

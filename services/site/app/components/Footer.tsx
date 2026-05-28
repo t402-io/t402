@@ -47,7 +47,6 @@ const footerLinks = {
   ],
   resources: [
     { label: "GitHub", href: "https://github.com/t402-io/t402", external: true },
-    { label: "Blog", href: "/writing" },
     { label: "FAQ", href: "/faq" },
     { label: "Status", href: "https://status.t402.io", external: true },
     { label: "t402 Pay", href: "https://pay.t402.io", external: true },
