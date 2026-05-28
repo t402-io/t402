@@ -55,25 +55,19 @@ export const metadata: Metadata = {
   openGraph: {
     title: "T402 - Open-source HTTP Payment Protocol for Stablecoins",
     description:
-      "HTTP-native stablecoin payments across 47 networks. Zero fees. Instant settlement. Built for AI agents.",
+      "HTTP-native stablecoin payments across 47 networks. Zero protocol fees. Instant settlement. Wire-compatible with x402.",
     type: "website",
     siteName: "T402",
     url: "https://t402.io",
-    images: [
-      {
-        url: "/t402-logo.png",
-        width: 512,
-        height: 512,
-        alt: "T402 - Open-source HTTP Payment Protocol for Stablecoins",
-      },
-    ],
+    // Note: image is auto-emitted by app/opengraph-image.tsx (editorial cover).
+    // No static fallback — old /t402-logo.png contained gem+₮ device mark.
   },
   twitter: {
     card: "summary_large_image",
     title: "T402 - Open-source HTTP Payment Protocol for Stablecoins",
     description:
-      "HTTP-native stablecoin payments across 47 networks. Zero fees. Instant settlement. Built for AI agents.",
-    images: ["/t402-logo.png"],
+      "HTTP-native stablecoin payments across 47 networks. Zero protocol fees. Instant settlement. Wire-compatible with x402.",
+    // Image is auto-emitted by app/twitter-image.tsx (editorial cover).
   },
   robots: {
     index: true,
