@@ -1,4 +1,4 @@
-# T402 - The Official Payment Protocol for USDT
+# T402 - Open-source HTTP Payment Protocol for Stablecoins
 # https://t402.io
 
 User-agent: *
