@@ -19,3 +19,6 @@ export * from "./erc20-approval-gas-sponsoring";
 
 // Offer and Receipt extension
 export * from "./offer-receipt";
+
+// Dispute extension (t402-leading)
+export * from "./dispute";
