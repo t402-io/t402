@@ -12,25 +12,6 @@ function GitHubIcon() {
   );
 }
 
-function ExternalLinkIcon() {
-  return (
-    <svg
-      width="12"
-      height="12"
-      viewBox="0 0 12 12"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-      className="opacity-40"
-    >
-      <path d="M3.5 8.5L8.5 3.5M8.5 3.5H4.5M8.5 3.5V7.5" />
-    </svg>
-  );
-}
-
 const navLinks = [
   { href: "/sdks", label: "SDKs" },
   { href: "https://pay.t402.io", label: "Pay", external: true },
@@ -42,8 +23,12 @@ export function NavBar() {
 
   return (
     <nav
-      className="sticky top-0 z-50 w-full border-b border-white/[0.06]"
-      style={{ background: "rgba(10, 10, 11, 0.8)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)" }}
+      className="sticky top-0 z-50 w-full border-b border-[var(--color-rule-soft)]"
+      style={{
+        background: "rgba(250, 250, 247, 0.92)",
+        backdropFilter: "blur(20px)",
+        WebkitBackdropFilter: "blur(20px)",
+      }}
       role="navigation"
       aria-label="Main navigation"
     >
@@ -52,14 +37,14 @@ export function NavBar() {
           {/* Logo */}
           <Link
             href="/"
-            className="flex shrink-0 items-center text-foreground transition-colors hover:text-brand"
+            className="flex shrink-0 items-center text-[var(--color-foreground)] transition-colors hover:text-[var(--color-brand)]"
             aria-label="T402 home"
           >
             <T402Logo title="T402" className="h-9 w-auto" />
           </Link>
 
           {/* Inline nav (no drawer; 3 links fit on every viewport) */}
-          <div className="flex items-center gap-1 sm:gap-2">
+          <div className="flex items-center gap-1 sm:gap-3">
             {navLinks.map((link) => {
               const active = !link.external && pathname === link.href;
               return (
@@ -69,11 +54,15 @@ export function NavBar() {
                   target={link.external ? "_blank" : undefined}
                   rel={link.external ? "noopener noreferrer" : undefined}
                   aria-current={active ? "page" : undefined}
-                  className="group relative flex items-center gap-1 px-2 py-2 text-sm font-medium transition-colors sm:px-3"
-                  style={{ color: active ? "#50AF95" : "#A1A1AA" }}
+                  className="font-serif text-base italic transition-colors hover:text-[var(--color-brand)]"
+                  style={{
+                    color: active
+                      ? "var(--color-brand)"
+                      : "var(--color-foreground-secondary)",
+                    padding: "0.5rem 0.5rem",
+                  }}
                 >
                   {link.label}
-                  {link.external && <ExternalLinkIcon />}
                 </Link>
               );
             })}
@@ -81,7 +70,7 @@ export function NavBar() {
               href="https://github.com/t402-io/t402"
               target="_blank"
               rel="noopener noreferrer"
-              className="ml-1 flex h-9 w-9 items-center justify-center rounded-xl text-foreground-secondary transition-colors hover:text-foreground"
+              className="ml-2 flex h-9 w-9 items-center justify-center text-[var(--color-foreground-secondary)] transition-colors hover:text-[var(--color-foreground)]"
               aria-label="GitHub"
             >
               <GitHubIcon />

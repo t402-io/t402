@@ -60,29 +60,24 @@ function FooterColumn({
 }) {
   return (
     <div>
-      <p
-        className="text-xs font-semibold uppercase"
-        style={{
-          color: "#50AF95",
-          letterSpacing: "0.1em",
-          fontSize: "0.75rem",
-        }}
-        role="heading"
-        aria-level={4}
-      >
+      <p className="eyebrow mb-5" style={{ color: "rgba(250, 250, 247, 0.6)" }}>
         {title}
       </p>
-      <ul className="mt-5 space-y-3">
+      <ul className="space-y-3">
         {links.map((link) => (
           <li key={link.label}>
             <Link
               href={link.href}
               target={link.external ? "_blank" : undefined}
               rel={link.external ? "noopener noreferrer" : undefined}
-              className="text-sm transition-colors duration-300"
-              style={{ color: "#A1A1AA" }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "#FAFAFA"; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "#A1A1AA"; }}
+              className="font-serif text-base italic transition-colors"
+              style={{ color: "rgba(250, 250, 247, 0.75)" }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.color = "var(--color-brand)";
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.color = "rgba(250, 250, 247, 0.75)";
+              }}
             >
               {link.label}
             </Link>
@@ -95,29 +90,39 @@ function FooterColumn({
 
 export function Footer() {
   return (
-    <footer
-      style={{ background: "#0A0A0B" }}
-      role="contentinfo"
-    >
-      {/* Gradient top border */}
-      <div className="divider-subtle" />
-
+    <footer style={{ background: "var(--bg-section-dark)" }} role="contentinfo">
       <div className="mx-auto max-w-[1440px] px-6 md:px-8 lg:px-12">
-        {/* Top section: Logo + tagline + columns */}
-        <div className="py-20">
+        {/* Top mark */}
+        <div
+          className="flex items-baseline justify-between py-6"
+          style={{ color: "rgba(250, 250, 247, 0.5)" }}
+        >
+          <span className="editorial-mark text-base" style={{ color: "var(--color-brand)" }}>
+            N° 402
+          </span>
+          <span className="eyebrow">Back cover</span>
+        </div>
+
+        <hr style={{ borderTop: "1px solid rgba(250, 250, 247, 0.18)" }} />
+
+        {/* Body */}
+        <div className="py-16 md:py-20">
           <div className="grid gap-12 lg:grid-cols-6 lg:gap-8">
             {/* Brand column */}
             <div className="lg:col-span-2">
-              <Link href="/" className="inline-block text-foreground">
+              <Link
+                href="/"
+                className="inline-block transition-colors"
+                style={{ color: "var(--color-background)" }}
+              >
                 <T402Logo title="T402" className="h-7 w-auto" />
               </Link>
               <p
-                className="mt-4 max-w-xs text-sm leading-relaxed"
-                style={{ color: "#71717A" }}
+                className="mt-5 max-w-xs font-serif text-base leading-relaxed"
+                style={{ color: "rgba(250, 250, 247, 0.6)" }}
               >
-                Open-source HTTP-native payment protocol for stablecoins.
-                Pay with USDT, USDC, and other ERC-20 / TRC-20 / TON tokens
-                across multiple blockchains.
+                An independent, open-source HTTP-native payment protocol for
+                stablecoins. Wire-compatible with x402. Apache 2.0.
               </p>
             </div>
 
@@ -130,28 +135,30 @@ export function Footer() {
           </div>
         </div>
 
+        <hr style={{ borderTop: "1px solid rgba(250, 250, 247, 0.12)" }} />
+
         {/* Bottom bar */}
-        {/* Trademark disclaimer moved to layout.tsx as a SSR aside —
-            see services/site/app/layout.tsx for the source-of-truth text. */}
-        <div
-          className="flex flex-col items-center justify-between gap-6 py-6 sm:flex-row"
-          style={{ borderTop: "1px solid rgba(255, 255, 255, 0.06)" }}
-        >
-          {/* Copyright - left */}
-          <p className="text-sm" style={{ color: "#52525B" }}>
-            &copy; {new Date().getFullYear()} T402 Protocol. Apache 2.0 License.
+        <div className="flex flex-col items-center justify-between gap-4 py-6 sm:flex-row">
+          <p
+            className="font-serif text-sm italic"
+            style={{ color: "rgba(250, 250, 247, 0.5)" }}
+          >
+            © {new Date().getFullYear()} T402 Protocol. Apache 2.0 License.
           </p>
 
-          {/* Social icons - center */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-5">
             <Link
               href="https://github.com/t402-io/t402"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex h-9 w-9 items-center justify-center rounded-xl transition-all duration-300"
-              style={{ color: "#52525B" }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "#50AF95"; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "#52525B"; }}
+              className="transition-colors"
+              style={{ color: "rgba(250, 250, 247, 0.5)" }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.color = "var(--color-brand)";
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.color = "rgba(250, 250, 247, 0.5)";
+              }}
               aria-label="GitHub"
             >
               <GitHubIcon className="h-5 w-5" />
@@ -160,35 +167,46 @@ export function Footer() {
               href="https://t.me/t402_io"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex h-9 w-9 items-center justify-center rounded-xl transition-all duration-300"
-              style={{ color: "#52525B" }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "#50AF95"; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "#52525B"; }}
+              className="transition-colors"
+              style={{ color: "rgba(250, 250, 247, 0.5)" }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.color = "var(--color-brand)";
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.color = "rgba(250, 250, 247, 0.5)";
+              }}
               aria-label="Telegram"
             >
               <TelegramIcon className="h-5 w-5" />
             </Link>
           </div>
 
-          {/* Legal links - right */}
           <div className="flex items-center gap-6">
             <Link
               href="/privacy"
-              className="text-sm transition-colors duration-300"
-              style={{ color: "#52525B" }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "#A1A1AA"; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "#52525B"; }}
+              className="eyebrow transition-colors"
+              style={{ color: "rgba(250, 250, 247, 0.5)" }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.color = "rgba(250, 250, 247, 0.85)";
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.color = "rgba(250, 250, 247, 0.5)";
+              }}
             >
-              Privacy Policy
+              Privacy
             </Link>
             <Link
               href="/terms"
-              className="text-sm transition-colors duration-300"
-              style={{ color: "#52525B" }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "#A1A1AA"; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "#52525B"; }}
+              className="eyebrow transition-colors"
+              style={{ color: "rgba(250, 250, 247, 0.5)" }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.color = "rgba(250, 250, 247, 0.85)";
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.color = "rgba(250, 250, 247, 0.5)";
+              }}
             >
-              Terms of Service
+              Terms
             </Link>
           </div>
         </div>
