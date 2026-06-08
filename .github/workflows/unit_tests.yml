@@ -36,7 +36,7 @@ jobs:
 
       - name: Upload coverage to Codecov
         if: matrix.node-version == '20'
-        uses: codecov/codecov-action@v6
+        uses: codecov/codecov-action@v7
         with:
           files: ./sdks/typescript/coverage/lcov.info
           flags: typescript
@@ -70,7 +70,7 @@ jobs:
 
       - name: Upload coverage to Codecov
         if: matrix.go-version == '1.26'
-        uses: codecov/codecov-action@v6
+        uses: codecov/codecov-action@v7
         with:
           files: ./sdks/go/coverage.out
           flags: go
@@ -104,7 +104,7 @@ jobs:
         run: uv run python -m pytest --cov=t402 --cov-report=xml
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v6
+        uses: codecov/codecov-action@v7
         with:
           files: ./sdks/python/t402/coverage.xml
           flags: python
@@ -133,7 +133,7 @@ jobs:
         run: mvn verify -B
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v6
+        uses: codecov/codecov-action@v7
         with:
           files: ./sdks/java/target/site/jacoco/jacoco.xml
           flags: java
