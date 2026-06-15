@@ -3,9 +3,9 @@ module github.com/t402-io/t402/sdks/go
 go 1.26.1
 
 require (
-	github.com/ethereum/go-ethereum v1.17.2
+	github.com/ethereum/go-ethereum v1.17.3
 	github.com/gagliardetto/binary v0.8.0
-	github.com/gagliardetto/solana-go v1.19.0
+	github.com/gagliardetto/solana-go v1.21.0
 	github.com/gin-gonic/gin v1.12.0
 	github.com/miguelmota/go-ethereum-hdwallet v0.1.3
 	github.com/quic-go/quic-go v0.59.0 // indirect; Security fix for GHSA-47m2-4cr7-mhcw
@@ -15,13 +15,13 @@ require (
 )
 
 require (
-	github.com/btcsuite/btcd/btcec/v2 v2.3.6
-	github.com/go-chi/chi/v5 v5.2.5
+	github.com/btcsuite/btcd/btcec/v2 v2.5.0
+	github.com/go-chi/chi/v5 v5.3.0
 	github.com/gofiber/fiber/v2 v2.52.13
-	github.com/labstack/echo/v4 v4.15.2
+	github.com/labstack/echo/v4 v4.15.3
 	github.com/mr-tron/base58 v1.3.0
-	github.com/xssnick/tonutils-go v1.16.0
-	golang.org/x/crypto v0.50.0
+	github.com/xssnick/tonutils-go v1.17.2
+	golang.org/x/crypto v0.51.0
 )
 
 require (
@@ -45,7 +45,7 @@ require (
 	github.com/crate-crypto/go-eth-kzg v1.5.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/deckarep/golang-set/v2 v2.6.0 // indirect
-	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.0.1 // indirect
+	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.4.0 // indirect
 	github.com/ethereum/c-kzg-4844/v2 v2.1.6 // indirect
 	github.com/fatih/color v1.18.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.12 // indirect
@@ -75,7 +75,9 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/mostynb/zstdpool-freelist v0.0.0-20201229113212-927304c0c3b1 // indirect
+	github.com/oasisprotocol/curve25519-voi v0.0.0-20251114093237-2ab5a27a1729 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
+	github.com/pierrec/lz4/v4 v4.1.26 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/quic-go/qpack v0.6.0 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
@@ -103,9 +105,9 @@ require (
 	golang.org/x/arch v0.22.0 // indirect
 	golang.org/x/net v0.53.0 // indirect
 	golang.org/x/sync v0.20.0 // indirect
-	golang.org/x/sys v0.43.0 // indirect
-	golang.org/x/term v0.42.0 // indirect
-	golang.org/x/text v0.36.0 // indirect
+	golang.org/x/sys v0.44.0 // indirect
+	golang.org/x/term v0.43.0 // indirect
+	golang.org/x/text v0.37.0 // indirect
 	golang.org/x/time v0.15.0 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
