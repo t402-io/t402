@@ -98,7 +98,7 @@
     <dependency>
       <groupId>io.micronaut</groupId>
       <artifactId>micronaut-http</artifactId>
-      <version>4.10.22</version>
+      <version>5.0.0</version>
       <scope>provided</scope>
     </dependency>
 
