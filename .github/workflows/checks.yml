@@ -16,7 +16,7 @@ jobs:
         check: [format, lint, lockfile]
     name: ts-${{ matrix.workspace.name }}-${{ matrix.check }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v6
@@ -66,7 +66,7 @@ jobs:
       run:
         working-directory: ./sdks/python/t402
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Install uv
         uses: astral-sh/setup-uv@v7
