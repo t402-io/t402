@@ -24,7 +24,7 @@
     "@types/react": "^18.3.0",
     "autoprefixer": "^10.5.0",
     "pagefind": "^1.5.2",
-    "postcss": "^8.5.13",
+    "postcss": "^8.5.15",
     "tailwindcss": "^3.4.0",
     "typescript": "^5.5.0"
   }
